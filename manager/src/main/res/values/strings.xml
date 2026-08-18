@@ -1,0 +1,501 @@
+<resources>
+    <string name="app_name" translatable="false">江望sk</string>
+    <string name="patch_hub_title" translatable="false">JWSK 镜像修补中心</string>
+    <string name="patch_hub_summary" translatable="false">统一修补 boot / init_boot：Magisk 30.7、KernelSU 3.2.5 LKM 与自定义内核</string>
+
+    <!-- To translators: you can leave your here -->
+    <string name="translation_contributors" />
+
+    <!-- Accessibility -->
+    <string name="accessibility_navigate_up">Navigate up</string>
+    <string name="accessibility_close">Close</string>
+    <string name="accessibility_more_options">More options</string>
+    <string name="accessibility_open_on_github">Open on GitHub</string>
+
+    <!-- Home - Status -->
+    <string name="home_status_service_is_running">%1$s is running</string>
+    <string name="home_status_service_not_running">%1$s is not running</string>
+    <string name="home_status_service_version">Version %2$s, %1$s</string>
+    <string name="home_status_service_version_update"><![CDATA[Version %2$s, %1$s<br>Start again to update to version %3$s]]></string>
+
+    <!-- Home - Adb -->
+    <string name="home_adb_title"><![CDATA[Start by connecting to a computer]]></string>
+    <string name="home_adb_description"><![CDATA[For devices without root, you need to use adb to start JWSK (requires computer connection). This process needs to be repeated every time the device is restarted. Please <b><a href=\"%1$s\">read the help</a></b>.]]></string>
+    <string name="home_adb_button_view_help">Read help</string>
+    <string name="home_adb_button_view_command">View command</string>
+    <string name="home_adb_dialog_view_command_message"><![CDATA[<font face="monospace">%1$s</font><br><br>* There are some other considerations, please confirm that you have read the help first.]]></string>
+    <string name="home_adb_dialog_view_command_copy_button">Copy</string>
+    <string name="home_adb_dialog_view_command_button_send">Send</string>
+
+    <!-- Home - Wireless Adb -->
+    <string name="home_wireless_adb_title"><![CDATA[Start via Wireless debugging]]></string>
+    <string name="home_wireless_adb_description"><![CDATA[On Android 11 or above, you can enable Wireless debugging and start JWSK directly from your device, without connecting to a computer.<p>Please view the step-by-step guide first.]]></string>
+    <string name="home_wireless_adb_description_pre_11"><![CDATA[Before Android 11, connecting to a computer is required to enable Wireless debugging.]]></string>
+    <string name="home_wireless_adb_view_guide_button">Step-by-step guide</string>
+    <string name="home_local_network_title">Local network access</string>
+    <string name="home_local_network_description">Wireless debugging needs %1$s on this Android version.</string>
+    <string name="home_local_network_granted">%1$s is granted.</string>
+    <string name="home_local_network_missing">%1$s is not granted.</string>
+    <string name="home_local_network_grant">Grant access</string>
+    <string name="home_local_network_permission_denied">Local network access is required for Wireless debugging.</string>
+
+    <!-- Adb -->
+    <string name="dialog_adb_discovery">Searching for wireless debugging service</string>
+    <string name="dialog_adb_discovery_message">Please enable \"Wireless debugging\" in \"Developer options\". \"Wireless debugging\" is automatically disabled when network changes.\n\nNote, do not disable \"Developer options\" or \"USB debugging\", or JWSK will be stopped.</string>
+    <string name="dialog_adb_discovery_message_toggle_wireless_debugging">Please try to disable and enable \"Wireless debugging\" if it keeps searching.</string>
+    <string name="dialog_adb_port">Port</string>
+    <string name="dialog_adb_invalid_port">Port is an integer ranging from 1 to 65535.</string>
+    <string name="adb_pairing">Pairing</string>
+    <string name="dialog_adb_pairing_title">Pair with device</string>
+    <string name="dialog_adb_pairing_discovery">Searching for pairing service</string>
+    <string name="dialog_adb_pairing_paring_code">Pairing code</string>
+    <string name="paring_code_is_wrong">Pairing code is wrong.</string>
+    <string name="cannot_connect_port">Can\'t connect to wireless debugging service.</string>
+    <string name="dialog_wireless_adb_not_enabled">Wireless debugging is not enabled.\nNote, before Android 11, to enable wireless debugging, computer connection is a must.</string>
+    <string name="dialog_adb_pairing_message">Please start paring by the following steps: \"Developer Options\" - \"Wireless debugging\" - \"Pairing device using pairing code\".\n\nAfter the pairing process starts, you will able to input the pairing code.</string>
+    <string name="adb_pairing_requires_multi_window">Please enter split-screen (multi-window) mode first.</string>
+    <string name="adb_pairing_requires_multi_window_reason">The system requires the pairing dialog always visible, using split-screen mode is the only way to let this app and system dialog visible at the same time.</string>
+    <string name="adb_error_key_store">Unable to generate key for wireless debugging.\nThis may be because KeyStore mechanism of this device is broken.</string>
+    <string name="adb_pair_required">Please go through the pairing step first.</string>
+    <string name="development_settings">Developer options</string>
+    <string name="notification_settings">Notification options</string>
+    <string name="adb_pairing_tutorial_title">Pair JWSK with your device</string>
+    <string name="adb_pairing_tutorial_content_notification">A notification from JWSK will help you complete the pairing.</string>
+    <string name="adb_pairing_tutorial_content_steps">Enter \"Developer options\" - \"Wireless debugging\". Tap \"Pair device with pairing code\", you will see a six-digit code.</string>
+    <string name="adb_pairing_tutorial_content_enter_pairing_code">Enter the code in the notification to complete pairing.</string>
+    <string name="adb_pairing_tutorial_content_notification_blocked">The pairing process needs you to interact with a notification from JWSK. Please allow JWSK to post notifications.</string>
+    <string name="adb_pairing_tutorial_content_miui">MIUI users may need to switch notification style to \"Android\" from \"Notification\" - \"Notification shade\" in system settings.</string>
+    <string name="adb_pairing_tutorial_content_miui_2">Otherwise, you may not able to enter paring code from the notification.</string>
+    <string name="adb_pairing_tutorial_content_left_is_clickable">Please note, left part of the \"Wireless debugging\" option is clickable, tapping it will open a new page. Only turing on the switch on the right is incorrect.</string>
+    <string name="adb_pairing_tutorial_content_finish">Back to JWSK and start JWSK.</string>
+    <string name="adb_pairing_tutorial_content_network">JWSK needs to access local network. It is controlled by the network permission.</string>
+    <string name="adb_pairing_tutorial_content_network_limation_not_foreground">Some systems (such as MIUI) disallow apps to access the network when they are not visible, even if the app uses foreground service as standard. Please disable battery optimization features for JWSK on such systems.</string>
+
+    <!-- Home - Root -->
+    <string name="home_root_title"><![CDATA[Start (for rooted devices)]]></string>
+    <string name="home_root_description"><![CDATA[In addition, JWSK can be started automatically on boot. If not, please check if your system or third-party tools have restricted JWSK.<br>You can refer to %s.]]></string>
+    <string name="home_root_description_sui"><![CDATA[If you are using Magisk, you can try %1$s. For root users, it will eventually replace JWSK. Note, existing applications needs to change a little to use %2$s.]]></string>
+    <string name="home_root_button_start">Start</string>
+    <string name="home_root_button_restart">Restart</string>
+
+    <!-- Home - Application management -->
+    <string name="home_app_management_title">Application management</string>
+    <plurals name="home_app_management_authorized_apps_count">
+        <item quantity="one"><![CDATA[Authorized %d application]]></item>
+        <item quantity="other"><![CDATA[Authorized %d applications]]></item>
+    </plurals>
+    <string name="home_app_management_view_authorized_apps"><![CDATA[Tap to manage authorized apps]]></string>
+    <string name="home_app_management_empty">Apps that has requested or declared JWSK will show here.</string>
+
+    <!-- Home - Learn more -->
+    <string name="home_learn_more_title">Learn JWSK</string>
+    <string name="home_learn_more_description">Learn how to develop with JWSK</string>
+
+    <!-- Home - Diagnostics -->
+    <string name="home_refresh">Refresh</string>
+    <string name="home_diagnostics_title">Diagnostics</string>
+    <string name="home_diagnostics_copy">Copy diagnostics</string>
+    <string name="home_diagnostics_copied">Diagnostics copied.</string>
+    <string name="home_modules_description">Install and manage ADB-backed modules</string>
+
+    <!-- Home - Adb permissions limited -->
+    <string name="home_adb_is_limited_title">You need to take an extra step</string>
+    <string name="home_adb_is_limited_description">Your device manufacturer has restricted adb permissions and apps using JWSK will not work properly.\n\nUsually, this limitation can be lifted by adjusting some options in \"Developer options\". Please read the help for details on how to do this.\n\nYou may need to restart JWSK for the operation to take effect.</string>
+
+    <!-- Application management -->
+    <string name="app_management_select_all">Select all</string>
+    <string name="app_management_deselect_all">Deselect all</string>
+    <string name="app_management_dialog_adb_is_limited_title">The permission of adb is limited</string>
+    <string name="app_management_dialog_adb_is_limited_message"><![CDATA[It\'s highly possible that your device manufacturer limits the permission of adb.<p>There may be a solution for your system in <b><a href=\"%1$s\">this document</a></b>.]]></string>
+    <string name="app_management_item_summary_requires_root">* requires JWSK runs with root</string>
+
+    <!-- Terminal -->
+    <string name="home_terminal_title">Use JWSK in terminal apps</string>
+    <string name="home_terminal_description">Run commands through JWSK in terminal apps you like</string>
+    <string name="terminal_tutorial_1">First, Export files to any where you want. You will find two files, %1$s and %2$s.</string>
+    <string name="terminal_tutorial_1_description">If there are files with the same name in the selected folder, they will be deleted.\n\nThe export function uses SAF (Storage Access Framework). It\'s reported that MIUI breaks the functions of SAF. If you are using MIUI, you may have to extract the file from JWSK\'s apk or download from GitHub.</string>
+    <string name="terminal_export_files">Export files</string>
+    <string name="terminal_tutorial_2">Then, use any text editor to open and edit %1$s.</string>
+    <string name="terminal_tutorial_2_description">For example, if you want to use JWSK in %1$s, you should replace %2$s with %3$s (%4$s is the package name of %1$s).</string>
+    <string name="terminal_tutorial_3">Finally, move the files to somewhere where your terminal app can access, you will be able to use %1$s to run commands through JWSK.</string>
+    <string name="terminal_tutorial_3_description">Some tips: grant execute permission to %1$s and add it to %2$s, you will able to use %1$s directly.</string>
+    <string name="rish_description"><![CDATA[
+With %1$s, in any terminal app, you can connect to and interact with the shell runs by JWSK.
+<p>About the detailed usage %1$s, tap to view the document.
+    ]]></string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_user_interface">Appearance</string>
+    <string name="settings_black_night_theme">Black night theme</string>
+    <string name="settings_black_night_theme_summary">Use the pure black theme if night mode is enabled</string>
+    <string name="settings_startup">Startup</string>
+    <string name="settings_translation_contributors">Translation contributors</string>
+    <string name="settings_translation">Participate in translation</string>
+    <string name="settings_translation_summary">Help us translate %s into your language</string>
+    <string name="settings_start_on_boot">Start on boot</string>
+    <string name="settings_start_on_boot_summary">JWSK can start automatically on boot after it has been started successfully.</string>
+    <string name="settings_use_system_color">Use system theme color</string>
+
+    <!-- ADB modules -->
+    <string name="modules_title">ADB Modules</string>
+    <string name="modules_settings_title">Modules</string>
+    <string name="modules_settings_summary">Install ZIP modules and run their actions through the active JWSK ADB/root server</string>
+    <string name="modules_header_summary">%1$d installed, %2$d enabled</string>
+    <string name="modules_version_label">Version: %s</string>
+    <string name="modules_author_label">Author: %s</string>
+    <string name="modules_access_mode">Module access mode</string>
+    <string name="modules_access_mode_safe">Safe</string>
+    <string name="modules_access_mode_safe_summary">No shell bridge, no WebUI download, no actions, no services.</string>
+    <string name="modules_access_mode_custom">Custom</string>
+    <string name="modules_access_mode_custom_summary">Choose action, service, WebUI bridge, network, and download permissions manually.</string>
+    <string name="modules_access_mode_full">Full access</string>
+    <string name="modules_access_mode_full_summary">Allows shell bridge, actions, services, and WebUI downloads. WebView internet stays blocked.</string>
+    <string name="modules_custom_permissions">Custom permissions</string>
+    <string name="modules_custom_permissions_summary">Configure every module permission separately</string>
+    <string name="modules_permission_action">Run Action</string>
+    <string name="modules_permission_action_summary">Allow manual action.sh execution.</string>
+    <string name="modules_permission_service">Run Service</string>
+    <string name="modules_permission_service_summary">Allow service.sh when background actions are also enabled.</string>
+    <string name="modules_permission_web_bridge">WebUI shell bridge</string>
+    <string name="modules_permission_web_bridge_summary">Expose window.JWSK only for local WebUI and only when WebView internet is off.</string>
+    <string name="modules_permission_web_network">WebView internet</string>
+    <string name="modules_permission_web_network_summary">Allow HTTPS navigation/assets. This disables shell bridge exposure for that WebView.</string>
+    <string name="modules_permission_web_download">WebUI download()</string>
+    <string name="modules_permission_web_download_summary">Allow HTTPS file downloads into the WebUI folder, except index.html.</string>
+    <string name="modules_background_actions">Allow background actions</string>
+    <string name="modules_background_actions_summary">Permit installed modules to request background ADB work in full access mode</string>
+    <string name="modules_background_allowed">Background allowed</string>
+    <string name="modules_background_blocked">Background blocked</string>
+    <string name="modules_install_zip">Install ZIP</string>
+    <string name="modules_empty_title">No modules installed</string>
+    <string name="modules_empty_summary">ADB modules use a KernelSU/Magisk-style ZIP with module.prop, optional banner, WebUI, action.sh and service.sh.</string>
+    <string name="modules_install_success">Installed %s</string>
+    <string name="modules_install_failed">Install failed: %s</string>
+    <string name="modules_enabled">Enabled</string>
+    <string name="modules_disabled">Disabled</string>
+    <string name="modules_enable">Enable</string>
+    <string name="modules_disable">Disable</string>
+    <string name="modules_full_trust">Full Trust</string>
+    <string name="modules_trust">Trust</string>
+    <string name="modules_untrust">Untrust</string>
+    <string name="modules_run_action">Action</string>
+    <string name="modules_run_service">Service</string>
+    <string name="modules_running">Running module script…</string>
+    <string name="modules_open_webui">WebUI</string>
+    <string name="modules_webui">Module WebUI</string>
+    <string name="modules_delete">Delete</string>
+    <string name="modules_delete_title">Delete module?</string>
+    <string name="modules_delete_message">%s will be removed from JWSK module storage.</string>
+    <string name="modules_action_result">Action finished: exit %d</string>
+    <string name="modules_action_failed">Action failed</string>
+    <string name="modules_service_result">Service finished: exit %d</string>
+    <string name="modules_service_failed">Service failed</string>
+    <string name="modules_recommand_title">ReCommand</string>
+    <string name="modules_recommand_source">%1$s / %2$s</string>
+    <string name="modules_recommand_expand">Expand</string>
+    <string name="modules_recommand_collapse">Collapse</string>
+    <string name="modules_recommand_copy">Copy</string>
+    <string name="modules_recommand_execute">Execute</string>
+    <string name="modules_recommand_close">Close</string>
+    <string name="modules_recommand_command_clip_label">Module command</string>
+    <string name="modules_recommand_webui">ReCommand for WebUI</string>
+    <string name="modules_recommand_webui_summary">Show a confirmation dialog before WebUI shell exec.</string>
+    <string name="modules_recommand_action">ReCommand for Action</string>
+    <string name="modules_recommand_action_summary">Show a confirmation dialog before action.sh.</string>
+    <string name="modules_ai">AI</string>
+    <string name="modules_ai_api_key">API key</string>
+    <string name="modules_ai_api_key_summary">Stored encrypted with Android Keystore.</string>
+    <string name="modules_ai_unlocked">AI checker unlocked</string>
+    <string name="modules_ai_hidden">AI checker hidden</string>
+    <string name="modules_ai_failed">AI check failed: %s</string>
+    <string name="modules_tab_installed">Installed</string>
+    <string name="modules_tab_catalog">Catalog</string>
+    <string name="modules_check_updates">Check updates</string>
+    <string name="modules_checking_updates">Checking for updates…</string>
+    <string name="modules_no_updates">All modules are up to date</string>
+    <string name="modules_update_available">Update available: v%s</string>
+    <string name="modules_update_button">Update</string>
+    <string name="modules_updating">Updating module…</string>
+    <string name="modules_update_success">Module updated to v%s</string>
+    <string name="modules_download_downloads">Download to Downloads</string>
+    <string name="modules_download_install">Download &amp; Install</string>
+    <string name="modules_downloading">Downloading…</string>
+    <string name="modules_download_enqueued">Download started in background</string>
+    <string name="modules_search_placeholder">Search catalog modules…</string>
+
+    <!-- About -->
+    <string name="action_about">About</string>
+    <string name="about_source_code_button">Source code</string>
+    <string name="about_view_source_code"><![CDATA[View source code at %s]]></string>
+
+    <!-- Stop -->
+    <string name="action_stop">Stop JWSK</string>
+    <string name="dialog_stop_message">JWSK service will be stopped.</string>
+    <string name="service_already_stopped">JWSK service is already stopped.</string>
+    <string name="service_stop_success">JWSK service stopped.</string>
+    <string name="service_stop_still_running">service is still running</string>
+    <string name="service_stop_failed">Failed to stop JWSK: %1$s</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_service_status">Service start status</string>
+    <string name="notification_service_starting">JWSK service is starting…</string>
+    <string name="notification_service_start_failed">Start JWSK service failed.</string>
+    <string name="notification_service_start_no_root">Failed to request root permission.</string>
+    <string name="notification_working">Working…</string>
+    <string name="notification_channel_adb_pairing">Wireless debugging pairing</string>
+    <string name="notification_adb_pairing_input_paring_code">Enter pairing code</string>
+    <string name="notification_adb_pairing_searching_for_service_title">Searching for pairing service</string>
+    <string name="notification_adb_pairing_service_found_title">Pairing service found</string>
+    <string name="notification_adb_pairing_stop_searching">Stop searching</string>
+    <string name="notification_adb_pairing_working_title">Pairing in progress</string>
+    <string name="notification_adb_pairing_succeed_title">Pairing successful</string>
+    <string name="notification_adb_pairing_succeed_text">You can start JWSK service now.</string>
+    <string name="notification_adb_pairing_failed_title">Pairing failed</string>
+    <string name="notification_adb_pairing_retry">Retry</string>
+
+    <!-- Permission related, appears in system permission UI -->
+    <string name="permission_group_label" translatable="false">JWSK</string>
+    <string name="permission_group_description" translatable="false">@string/permission_label</string>
+    <string name="permission_label">access JWSK</string>
+    <string name="permission_description">Allow the app to use JWSK.</string>
+    <string name="permission_warning_template"><![CDATA[Allow <b>%1$s</b> to %2$s?]]></string>
+    <string name="grant_dialog_button_allow_always">Allow all the time</string>
+    <string name="grant_dialog_button_deny">"Deny"</string>
+
+    <!-- Starter -->
+    <string name="starter">Starter</string>
+    <string name="starting_root_shell" translatable="false">Starting root shell…</string>
+    <string name="start_with_root_failed">Can\'t start service because root permission is not granted or this device is not rooted.</string>
+
+    <!-- Misc -->
+    <string name="dialog_cannot_open_browser_title">Can\'t start browser</string>
+    <string name="toast_copied_to_clipboard">%s\nhas been copied to clipboard.</string>
+    <string name="toast_copied_to_clipboard_with_text"><![CDATA[<b>%s</b> has been copied to clipboard.]]></string>
+
+    <!-- Messages for legacy -->
+    <string name="dialog_legacy_not_support_title">%1$s does not support modern JWSK</string>
+    <string name="dialog_legacy_not_support_message"><![CDATA[Legacy JWSK has been deprecated since March 2019. Also, legacy JWSK does not work on newer Android systems.<p>Please ask the developer of <b>%1$s</b> to update.]]></string>
+    <string name="dialog_requesting_legacy_title">%1$s is requesting legacy JWSK</string>
+    <string name="dialog_requesting_legacy_message"><![CDATA[<b>%1$s</b> has modern JWSK support, but it\'s requesting legacy JWSK. This could because JWSK is not running, please check in JWSK app.<p>Legacy JWSK has been deprecated since March 2019.]]></string>
+    <string name="dialog_requesting_legacy_button_open_shizuku">Open JWSK</string>
+
+    <!-- Lab Features -->
+    <string name="lab_features_title">Lab Features</string>
+    <string name="lab_features_summary">Experimental features</string>
+    <string name="shizuku_connectors_title">JWSK Connectors</string>
+    <string name="shizuku_connectors_summary">Allow plugins to activate JWSK</string>
+    <string name="unsafe_warning_title">Warning</string>
+    <string name="unsafe_warning_message">Enabling this feature is UNSAFE. Are you sure?</string>
+    <string name="dhizuku_mode_title">Dhizuku Mode</string>
+    <string name="dhizuku_mode_summary">Allow JWSK to operate via binding to Dhizuku</string>
+    <string name="home_dhizuku_title"><![CDATA[Start (via Dhizuku)]]></string>
+    <string name="home_dhizuku_description"><![CDATA[For devices managed by Dhizuku, you can start JWSK directly using Device Owner privileges.]]></string>
+    <string name="dhizuku_warning_title">Warning: Dhizuku Mode</string>
+    <string name="dhizuku_warning_message">Dhizuku is designed for Device Owner/admin privileges. Some shell and ADB-specific commands may not work properly or may be entirely unsupported when running JWSK via Dhizuku. Are you sure you want to proceed?</string>
+    <string name="settings_tcp_mode">TCP Mode</string>
+    <string name="settings_tcp_mode_summary">Restart ADB startup onto TCP port 5555 so JWSK can reconnect without relying on the changing Wireless Debugging port.</string>
+    <string name="settings_restart_dialog_title">Restart required</string>
+    <string name="settings_restart_dialog_message">JWSK needs to restart to apply this TCP mode change.</string>
+    <string name="settings_restart_dialog_message_wifi_required">
+
+Wi-Fi is required for the first restart because JWSK must connect to the current Wireless Debugging port before switching ADB to 5555.</string>
+    <string name="settings_auto_disable_usb_debugging">Auto-disable USB debugging</string>
+    <string name="settings_auto_disable_usb_debugging_summary">Turn off USB debugging after reboot when JWSK is not configured to start on boot</string>
+    <string name="settings_service_group">Service Maintenance</string>
+
+    <!-- Lab Features - Service Behavior -->
+    <string name="lab_service_behavior_title">Service Behavior</string>
+    <string name="lab_keep_alive_title">Keep Service Alive</string>
+    <string name="lab_keep_alive_summary">Periodically check that the JWSK service is running and restart it if needed</string>
+    <string name="lab_auto_restart_title">Auto-Restart on Crash</string>
+    <string name="lab_auto_restart_summary">Automatically attempt to restart the JWSK service if it crashes unexpectedly</string>
+    <string name="lab_notify_death_title">Notify on Service Stop</string>
+    <string name="lab_notify_death_summary">Show a notification when the JWSK service stops unexpectedly</string>
+
+    <!-- Lab Features - Debugging -->
+    <string name="lab_debugging_title">Debugging</string>
+    <string name="lab_verbose_logging_title">Verbose Logging</string>
+    <string name="lab_verbose_logging_summary">Write detailed debug logs to Logcat. Disable in production to save battery</string>
+    <string name="notification_channel_watchdog">Service Watchdog</string>
+    <string name="notification_watchdog_title">JWSK Service Stopped</string>
+    <string name="notification_watchdog_text">The JWSK service has stopped unexpectedly.</string>
+    <string name="watchdog_service_title">JWSK watchdog is active</string>
+    <string name="watchdog_service_text">Monitoring the JWSK service for keep-alive recovery</string>
+
+    <!-- JWSK Control Notification -->
+    <string name="notification_control_channel_name">JWSK Control</string>
+    <string name="notification_control_title_running">JWSK is running</string>
+    <string name="notification_control_title_stopped">JWSK is stopped</string>
+    <string name="notification_control_text_running">Tap to open JWSK, or expand this notification to stop it.</string>
+    <string name="notification_control_text_stopped">Tap to open JWSK, or expand this notification to start it.</string>
+    <string name="notification_control_action_start">Start</string>
+    <string name="notification_control_action_stop">Stop</string>
+    <!-- Update Settings -->
+    <string name="update_settings_title">Update Settings</string>
+    <string name="update_settings_catalog">Module Catalog</string>
+    <string name="update_settings_catalog_enabled">Enable catalog</string>
+    <string name="update_settings_catalog_enabled_summary">Show discovered modules from GitHub Topics</string>
+    <string name="update_settings_frequency">Update Frequency</string>
+    <string name="update_settings_frequency_label">Check for updates</string>
+    <string name="update_settings_frequency_manual">Manual</string>
+    <string name="update_settings_frequency_daily">Daily</string>
+    <string name="update_settings_frequency_weekly">Weekly</string>
+    <string name="update_settings_install_mode">Install Mode</string>
+    <string name="update_settings_install_mode_label">Default install method</string>
+    <string name="update_settings_install_mode_sources">Build from sources</string>
+    <string name="update_settings_install_mode_release">Download release ZIP</string>
+    <string name="update_settings_github">GitHub</string>
+    <string name="update_settings_github_pat">Personal access token</string>
+    <string name="update_settings_github_pat_set">Token set</string>
+    <string name="update_settings_github_pat_unset">Not set (60 requests/hour)</string>
+    <string name="update_settings_github_pat_title">GitHub Personal Access Token</string>
+    <string name="update_settings_github_pat_description">Optional. A GitHub PAT increases API rate limits from 60 to 5000 requests/hour. Only needs public_repo scope for public repositories.</string>
+    <string name="update_settings_github_pat_label">Token</string>
+    <string name="update_settings_github_pat_show">Show</string>
+    <string name="update_settings_github_pat_hide">Hide</string>
+    <string name="update_settings_github_pat_clear">Clear</string>
+    <string name="update_settings_github_pat_delete">Delete token</string>
+    <string name="update_settings_github_pat_delete_summary">Remove stored GitHub token</string>
+
+    <!-- Module Catalog -->
+    <string name="modules_catalog">Catalog</string>
+    <string name="modules_catalog_title">Module Catalog</string>
+    <string name="modules_catalog_empty">No modules found</string>
+    <string name="modules_catalog_sort_newest">Newest</string>
+    <string name="modules_catalog_sort_oldest">Oldest</string>
+    <string name="modules_catalog_sort_stars">Stars</string>
+    <string name="modules_catalog_sort_official">Official</string>
+    <string name="modules_catalog_install_sources">Install from sources</string>
+    <string name="modules_catalog_install_release">Download release ZIP</string>
+    <string name="modules_catalog_install_description">Choose how to install this module:</string>
+    <string name="modules_catalog_install_success">Module installed successfully</string>
+    <string name="modules_catalog_install_failed">Install failed: %s</string>
+    <string name="modules_catalog_token_required">GitHub token required</string>
+    <string name="modules_catalog_token_hint">GitHub Personal Access Token</string>
+    <string name="modules_catalog_token_description">A token is needed to search GitHub for modules. You can create one at github.com/settings/tokens</string>
+    <string name="modules_catalog_token_format_warning">Token should start with ghp_ or github_pat_ and be at least 30 characters</string>
+    <string name="modules_catalog_loading">Loading catalog…</string>
+    <string name="modules_catalog_error">Failed to load catalog</string>
+    <string name="modules_catalog_install">Install</string>
+    <string name="modules_catalog_installing">Installing…</string>
+    <string name="modules_catalog_view_github">View on GitHub</string>
+    <string name="modules_catalog_skip_token">Skip</string>
+    <string name="modules_catalog_open">Open Catalog</string>
+
+    <!-- TV Status -->
+    <string name="tv_status_active">ACTIVE</string>
+    <string name="tv_status_disabled">DISABLED</string>
+    <string name="tv_status_trusted">TRUSTED</string>
+
+    <!-- Wear Catalog -->
+    <string name="wear_catalog_sort_newest">Newest</string>
+    <string name="wear_catalog_sort_stars">Stars</string>
+    <string name="wear_catalog_sort_official">Official</string>
+    <string name="wear_catalog_sort_by">Sort by</string>
+    <string name="wear_catalog_filter">Filter</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_restore_title">Backup &amp; Restore</string>
+    <string name="backup_title">Backup Settings &amp; Modules</string>
+    <string name="backup_summary">Export configuration and modules to a ZIP file</string>
+    <string name="restore_title">Restore Settings &amp; Modules</string>
+    <string name="restore_summary">Import configuration and modules from a ZIP file</string>
+
+    <!-- Comput Console -->
+    <string name="comput_title">Comput</string>
+    <string name="comput_settings">Comput Console Settings</string>
+    <string name="comput_adb_console">ADB Comput Console</string>
+    <string name="comput_recommand_title">ReCommand for Comput</string>
+    <string name="comput_recommand_summary">Show a confirmation dialog before running commands in Comput console</string>
+    <string name="comput_recommand_confirmation">Are you sure you want to execute this ADB command in Comput?</string>
+    <string name="comput_ai_api_key_empty">Google AI Studio API Key is empty! Please configure it in JWSK Settings (Comput Console Settings).</string>
+    <string name="comput_ai_api_key_title">Google AI Studio API Key</string>
+    <string name="comput_ai_api_key_not_configured">Not configured (Gemini AI will not work)</string>
+    <string name="comput_gemini_model_title">Gemini AI Model</string>
+    <string name="comput_gemini_explain">Gemini Explain</string>
+    <string name="comput_api_key_label">API Key</string>
+    <string name="comput_show_api_key">Show API key</string>
+    <string name="comput_hide_api_key">Hide API key</string>
+    <string name="comput_gemini_model_performance">High performance coding &amp; agentic (Recommended)</string>
+    <string name="comput_gemini_model_lightweight">Lightweight high speed model</string>
+    <string name="comput_gemini_api_error">Gemini API returned error code %1$d: %2$s</string>
+    <string name="comput_gemini_connection_error">Connection error.</string>
+    <string name="comput_gemini_failed">Failed to reach Gemini API: %1$s</string>
+    <string name="comput_gemini_no_details">No details.</string>
+    <string name="comput_sh_mode">sh Mode</string>
+    <string name="comput_adb_mode">adb Mode</string>
+    <string name="comput_command_label">Command</string>
+    <string name="comput_command_placeholder">e.g. pm list packages</string>
+    <string name="comput_run">Run</string>
+    <string name="comput_clear">Clear</string>
+    <string name="comput_console_cleared">Console cleared.</string>
+    <string name="comput_console_output">Console Output</string>
+    <string name="comput_output_copied">Output copied to clipboard</string>
+    <string name="comput_copy_output">Copy Output</string>
+    <string name="comput_ask_gemini">Ask Gemini</string>
+    <string name="comput_executing">Executing: %1$s ...</string>
+    <string name="comput_adb_translate">ADB Command Translation Mode Active\nOriginal: %1$s\nExecuting...</string>
+    <string name="comput_command_no_output">Command completed with no output.</string>
+    <string name="comput_timed_out">[E] Command timed out after 120 seconds.</string>
+    <string name="comput_exit_code">[E] Command exited with code %1$d.</string>
+    <string name="comput_running_macro">Running macro: %1$s</string>
+    <string name="comput_executing_cmd">> Executing command: %1$s</string>
+    <string name="comput_error_not_running">Error: Privileged JWSK Service is not running. Please start the service first.</string>
+    <string name="comput_error_no_binder">Error: Unable to retrieve JWSK binder.</string>
+    <string name="comput_console_initialized">Console initialized. Privileged JWSK service connected.\nReady for commands.</string>
+    <string name="comput_ai_explanation">AI Explanation</string>
+    <string name="comput_commandium">Commandium</string>
+    <string name="comput_commandium_assistant">Commandium AI Assistant</string>
+    <string name="comput_commandium_description">Generate shell commands using natural language. Gemini will output a raw, copyable command.</string>
+    <string name="comput_commandium_label">What command do you need?</string>
+    <string name="comput_commandium_placeholder">e.g. Find all files larger than 10MB in /sdcard</string>
+    <string name="comput_ask_commandium">Ask Commandium</string>
+    <string name="comput_generated_command">Generated Command:</string>
+    <string name="comput_command_pasted">Command pasted to input</string>
+    <string name="comput_use_command">Use command</string>
+    <string name="comput_copied_to_clipboard">Copied to clipboard</string>
+    <string name="comput_copy_command">Copy command</string>
+    <string name="comput_console_macros">Console Macros</string>
+    <string name="comput_stop">Stop (%1$d)</string>
+    <string name="comput_record_macro">Record Macro</string>
+    <string name="comput_recording_active">Recording active. Run commands using the main input to add them to this macro.</string>
+    <string name="comput_saved_macros">Saved Macros</string>
+    <string name="comput_no_macros">No saved macros yet. Click \'Record Macro\' to start recording console commands.</string>
+    <string name="comput_delete">Delete</string>
+    <string name="comput_recommand_confirmation_title">ReCommand confirmation</string>
+    <string name="comput_execute">Execute</string>
+    <string name="comput_cancel">Cancel</string>
+    <string name="comput_save_macro">Save Macro</string>
+    <string name="comput_save_macro_hint">Enter a name for the recorded macro:</string>
+    <string name="comput_macro_name_label">Macro Name</string>
+    <string name="comput_save">Save</string>
+    <string name="diagnostics_app">App</string>
+    <string name="diagnostics_android">Android</string>
+    <string name="diagnostics_service">Service</string>
+    <string name="diagnostics_server_uid">Server uid</string>
+    <string name="diagnostics_server_api">Server API</string>
+    <string name="diagnostics_selinux">SELinux</string>
+    <string name="diagnostics_adb_permission">ADB permission</string>
+    <string name="diagnostics_authorized_apps">Authorized apps</string>
+    <string name="diagnostics_local_network">Local network</string>
+    <string name="diagnostics_running">running</string>
+    <string name="diagnostics_stopped">stopped</string>
+    <string name="diagnostics_granted">granted</string>
+    <string name="diagnostics_missing">missing</string>
+    <string name="diagnostics_not_required">not required</string>
+    <string name="diagnostics_full">full</string>
+    <string name="diagnostics_limited">limited</string>
+    <string name="diagnostics_unknown">unknown</string>
+
+    <!-- ErrorProtect & TCP 5555 -->
+    <string name="error_protect_title">ErrorProtect</string>
+    <string name="error_protect_summary">Check process health and transactional errors every 10 seconds. Automatically stops and restarts JWSK if issues are found.</string>
+    <string name="settings_tcp_5555_title">TCP Binding 5555</string>
+    <string name="settings_tcp_5555_summary">Bind local ADB server to port 5555 to keep it working without Wireless Debugging port updates.</string>
+    <string name="settings_tcp_5555_button">Bind to 5555</string>
+    <string name="settings_tcp_5555_bind_success">Successfully bound ADB to TCP port 5555</string>
+    <string name="settings_tcp_5555_bind_failed">Failed to bind ADB to port 5555: %1$s</string>
+    <string name="settings_tcp_5555_bind_failed_generic">Root, Dhizuku, or active JWSK is required.</string>
+</resources>

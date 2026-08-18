@@ -1,0 +1,9 @@
+{
+  "tag_name": "v1.0.0",
+  "target_commitish": "main",
+  "name": "JWSK / 江望sk v1.0.0",
+  "body_path": "release-notes.md",
+  "asset_path": "out/apk/JWSK-v1.0.0-release.apk",
+  "draft": false,
+  "prerelease": false
+}

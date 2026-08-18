@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="translation_contributors">Community Translators</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_navigate_up">上に移動</string>
+    <string name="accessibility_close">閉じる</string>
+    <string name="accessibility_more_options">その他のオプション</string>
+    <string name="accessibility_open_on_github">GitHubで開く</string>
+
+    <!-- Home - Status -->
+    <string name="home_status_service_is_running">%1$s は実行中です</string>
+    <string name="home_status_service_not_running">%1$s は実行されていません</string>
+    <string name="home_status_service_version">バージョン %2$s, %1$s</string>
+    <string name="home_status_service_version_update"><![CDATA[バージョン %2$s, %1$s<br>再起動してバージョン %3$s に更新します]]></string>
+
+    <!-- Home - Adb -->
+    <string name="home_adb_title"><![CDATA[パソコンに接続して開始]]></string>
+    <string name="home_adb_description"><![CDATA[root権限のない端末では、JWSKを開始するためにADBを使用する必要があります（パソコンとの接続が必要です）。この手順は端末を再起動するたびに繰り返し行う必要があります。<b><a href=\"%1$s\">ヘルプを読む</a></b>をご参照ください。]]></string>
+    <string name="home_adb_button_view_help">ヘルプを読む</string>
+    <string name="home_adb_button_view_command">コマンドを表示</string>
+    <string name="home_adb_dialog_view_command_message"><![CDATA[<font face="monospace">%1$s</font><br><br>* その他の注意事項については、まずヘルプをお読みください。]]></string>
+    <string name="home_adb_dialog_view_command_copy_button">コピー</string>
+    <string name="home_adb_dialog_view_command_button_send">送信</string>
+
+    <!-- Home - Wireless Adb -->
+    <string name="home_wireless_adb_title"><![CDATA[ワイヤレスデバッグ経由で開始]]></string>
+    <string name="home_wireless_adb_description"><![CDATA[Android 11以降では、ワイヤレスデバッグを有効にすることで、パソコンに接続せず端末単体でJWSKを直接開始できます。<p>まずステップバイステップガイドをご覧ください。]]></string>
+    <string name="home_wireless_adb_description_pre_11"><![CDATA[Android 11未満では、ワイヤレスデバッグを有効にするためにパソコンへの接続が必要です。]]></string>
+    <string name="home_wireless_adb_view_guide_button">ステップバイステップガイド</string>
+    <string name="home_local_network_title">ローカルネットワークへのアクセス</string>
+    <string name="home_local_network_description">このAndroidバージョンでのワイヤレスデバッグには %1$s が必要です。</string>
+    <string name="home_local_network_granted">%1$s 許可されています。</string>
+    <string name="home_local_network_missing">%1$s 許可されていません。</string>
+    <string name="home_local_network_grant">アクセスを許可</string>
+    <string name="home_local_network_permission_denied">ワイヤレスデバッグにはローカルネットワークへのアクセスが必要です。</string>
+
+    <!-- Adb -->
+    <string name="dialog_adb_discovery">ワイヤレスデバッグサービスを検索中</string>
+    <string name="dialog_adb_discovery_message">「開発者向けオプション」で「ワイヤレスデバッグ」を有効にしてください。ネットワークが変更されると自動的にオフになります。\n\n注意: 「開発者向けオプション」や「USBデバッグ」を無効にしないでください。JWSKが停止します。</string>
+    <string name="dialog_adb_discovery_message_toggle_wireless_debugging">検索が続く場合は、「ワイヤレスデバッグ」を一度オフにしてから再度オンにしてください。</string>
+    <string name="dialog_adb_port">ポート</string>
+    <string name="dialog_adb_invalid_port">ポートは 1 から 65535 の整数である必要があります。</string>
+    <string name="adb_pairing">ペアリング</string>
+    <string name="dialog_adb_pairing_title">デバイスとペアリング</string>
+    <string name="dialog_adb_pairing_discovery">ペアリングサービスを検索中</string>
+    <string name="dialog_adb_pairing_paring_code">ペアリングコード</string>
+    <string name="paring_code_is_wrong">ペアリングコードが正しくありません。</string>
+    <string name="cannot_connect_port">ワイヤレスデバッグサービスに接続できません。</string>
+    <string name="dialog_wireless_adb_not_enabled">ワイヤレスデバッグが有効になっていません。\nAndroid 11未満ではパソコン接続が必要です。</string>
+    <string name="dialog_adb_pairing_message">次の手順でペアリングを開始してください: 「開発者向けオプション」-「ワイヤレスデバッグ」-「ペアリングコードでデバイスをペアリング」。\n\nペアリング開始後にコードを入力できます。</string>
+    <string name="adb_pairing_requires_multi_window">最初に分割画面（マルチウィンドウ）モードにしてください。</string>
+    <string name="adb_pairing_requires_multi_window_reason">システムはペアリングダイアログが常時表示されていることを要求します。分割画面モードのみがアプリとシステムのダイアログを同時に表示できます。</string>
+    <string name="adb_error_key_store">ワイヤレスデバッグ用キーを生成できません。\n端末のKeyStoreメカニズムが破損している可能性があります。</string>
+    <string name="adb_pair_required">最初にペアリングの手順を完了してください。</string>
+    <string name="development_settings">開発者向けオプション</string>
+    <string name="notification_settings">通知オプション</string>
+    <string name="adb_pairing_tutorial_title">JWSKと端末をペアリング</string>
+    <string name="adb_pairing_tutorial_content_notification">JWSKからの通知がペアリングの完了をサポートします。</string>
+    <string name="adb_pairing_tutorial_content_steps">「開発者向けオプション」-「ワイヤレスデバッグ」に進み、「ペアリングコードでデバイスをペアリング」をタップすると6桁のコードが表示されます。</string>
+    <string name="adb_pairing_tutorial_content_enter_pairing_code">通知にコードを入力してペアリングを完了します。</string>
+    <string name="adb_pairing_tutorial_content_notification_blocked">ペアリングにはJWSKの通知操作が必要です。JWSKの通知送信を許可してください。</string>
+    <string name="adb_pairing_tutorial_content_miui">MIUIユーザーは、「設定」-「通知」で通知スタイルを「Android」に変更する必要がある場合があります。</string>
+    <string name="adb_pairing_tutorial_content_miui_2">変更しないと、通知からペアリングコードを入力できない場合があります。</string>
+    <string name="adb_pairing_tutorial_content_left_is_clickable">「ワイヤレスデバッグ」の左側のテキスト部分をタップすると詳細ページが開きます。右側のスイッチのみをONにしても不十分です。</string>
+    <string name="adb_pairing_tutorial_content_finish">JWSKに戻り、サービスを開始します。</string>
+    <string name="adb_pairing_tutorial_content_network">JWSKはローカルネットワークへのアクセスが必要です。</string>
+    <string name="adb_pairing_tutorial_content_network_limation_not_foreground">一部のシステム（MIUIなど）ではバックグラウンドでのネットワークアクセスが制限されます。バッテリー最適化を無効化してください。</string>
+
+    <!-- Home - Root -->
+    <string name="home_root_title"><![CDATA[開始（root化済み端末用）]]></string>
+    <string name="home_root_description"><![CDATA[さらに、JWSKは起動時に自動開始できます。起動しない場合は、システムやサードパーティ製ツールによる制限がないか確認してください。<br>%s をご参照ください。]]></string>
+    <string name="home_root_description_sui"><![CDATA[Magiskをご利用の場合は %1$s をお試しください。rootユーザー向けに、将来的にJWSKを置き換えます。]]></string>
+    <string name="home_root_button_start">開始</string>
+    <string name="home_root_button_restart">再起動</string>
+
+    <!-- Home - Application management -->
+    <string name="home_app_management_title">アプリ管理</string>
+    <plurals name="home_app_management_authorized_apps_count">
+        <item quantity="other"><![CDATA[%d 個のアプリを許可済み]]></item>
+    </plurals>
+    <string name="home_app_management_view_authorized_apps"><![CDATA[タップして許可済みアプリを管理]]></string>
+    <string name="home_app_management_empty">JWSKを要求または宣言したアプリがここに表示されます。</string>
+
+    <!-- Home - Learn more -->
+    <string name="home_learn_more_title">JWSKについて学ぶ</string>
+    <string name="home_learn_more_description">JWSKを使った開発方法を学ぶ</string>
+
+    <!-- Home - Diagnostics -->
+    <string name="home_refresh">更新</string>
+    <string name="home_diagnostics_title">診断情報</string>
+    <string name="home_diagnostics_copy">診断情報をコピー</string>
+    <string name="home_diagnostics_copied">診断情報をクリップボードにコピーしました。</string>
+    <string name="home_modules_description">ADBモジュールのインストールと管理</string>
+
+    <!-- Home - Adb permissions limited -->
+    <string name="home_adb_is_limited_title">追加の手順が必要です</string>
+    <string name="home_adb_is_limited_description">端末の製造元によってADB権限が制限されており、JWSKを使用するアプリが正常に動作しない可能性があります。\n\n通常、「開発者向けオプション」の調整で解消できます。詳細はヘルプをご覧ください。\n\n変更適用のためJWSKの再起動が必要な場合があります。</string>
+
+    <!-- Application management -->
+    <string name="app_management_select_all">すべて選択</string>
+    <string name="app_management_deselect_all">選択を解除</string>
+    <string name="app_management_dialog_adb_is_limited_title">ADBの権限が制限されています</string>
+    <string name="app_management_dialog_adb_is_limited_message"><![CDATA[端末製造元によりADB権限が制限されている可能性が高いです。<p><b><a href=\"%1$s\">このドキュメント</a></b>に解決策が掲載されている場合があります。]]></string>
+    <string name="app_management_item_summary_requires_root">* JWSKをroot権限で実行する必要があります</string>
+
+    <!-- Terminal -->
+    <string name="home_terminal_title">ターミナルアプリでJWSKを使用</string>
+    <string name="home_terminal_description">お気に入りのターミナルアプリからJWSK経由でコマンドを実行</string>
+    <string name="terminal_tutorial_1">まず、任意の場所にファイルをエクスポートします。%1$s と %2$s の2つのファイルが生成されます。</string>
+    <string name="terminal_tutorial_1_description">選択したフォルダに同名ファイルが存在する場合、上書きされます。\n\nエクスポート機能はSAFを使用します。MIUIではSAFが正常に機能しない場合があるため、その場合はAPKから直接抽出するかGitHubからダウンロードしてください。</string>
+    <string name="terminal_export_files">ファイルをエクスポート</string>
+    <string name="terminal_tutorial_2">次に、テキストエディタで %1$s を開いて編集します。</string>
+    <string name="terminal_tutorial_2_description">例えば %1$s で使用する場合、%2$s を %3$s に置き換えます（%4$s は %1$s のパッケージ名です）。</string>
+    <string name="terminal_tutorial_3">最後に、ターミナルアプリからアクセスできる場所にファイルを移動すると、%1$s を使用してコマンドを実行できます。</string>
+    <string name="terminal_tutorial_3_description">ヒント: %1$s に実行権限を付与して %2$s に追加すると、%1$s を直接呼び出せます。</string>
+    <string name="rish_description"><![CDATA[%1$s を使用すると、任意のターミナルアプリからJWSKが実行するシェルに接続して操作できます。<p>詳細な使用方法はタップしてドキュメントをご覧ください。]]></string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_user_interface">外観</string>
+    <string name="settings_black_night_theme">漆黒テーマ</string>
+    <string name="settings_black_night_theme_summary">ダークモード有効時に完全な黒色の背景を使用</string>
+    <string name="settings_startup">起動</string>
+    <string name="settings_translation_contributors">翻訳貢献者</string>
+    <string name="settings_translation">翻訳に参加する</string>
+    <string name="settings_translation_summary">%s をあなたの言語に翻訳するのをサポート</string>
+    <string name="settings_start_on_boot">起動時に自動開始</string>
+    <string name="settings_start_on_boot_summary">JWSKが正常に開始された後、端末起動時に自動的に開始します。</string>
+    <string name="settings_use_system_color">システムテーマのカラーを使用</string>
+
+    <!-- ADB modules -->
+    <string name="modules_title">ADBモジュール</string>
+    <string name="modules_settings_title">モジュール</string>
+    <string name="modules_settings_summary">ZIPモジュールをインストールし、JWSKのADB/rootサーバー経由でアクションを実行</string>
+    <string name="modules_header_summary">%1$d 個インストール済み, %2$d 個有効</string>
+    <string name="modules_version_label">バージョン: %s</string>
+    <string name="modules_author_label">作者: %s</string>
+    <string name="modules_access_mode">モジュールアクセスモード</string>
+    <string name="modules_access_mode_safe">セーフ</string>
+    <string name="modules_access_mode_safe_summary">シェルブリッジなし、WebUIダウンロードなし、アクションなし、サービスなし。</string>
+    <string name="modules_access_mode_custom">カスタム</string>
+    <string name="modules_access_mode_custom_summary">アクション、サービス、WebUIブリッジ、ネットワーク、ダウンロード権限を手動で設定。</string>
+    <string name="modules_access_mode_full">フルアクセス</string>
+    <string name="modules_access_mode_full_summary">シェルブリッジ、アクション、サービス、WebUIダウンロードを許可。WebViewのインターネットはブロック維持。</string>
+    <string name="modules_custom_permissions">カスタム権限</string>
+    <string name="modules_custom_permissions_summary">モジュールの権限を個別に設定</string>
+    <string name="modules_permission_action">Actionの実行</string>
+    <string name="modules_permission_action_summary">action.sh の手動実行を許可。</string>
+    <string name="modules_permission_service">Serviceの実行</string>
+    <string name="modules_permission_service_summary">バックグラウンドアクションが有効な場合に service.sh を許可。</string>
+    <string name="modules_permission_web_bridge">WebUIシェルブリッジ</string>
+    <string name="modules_permission_web_bridge_summary">ローカルWebUIかつWebViewインターネット無効時のみ window.JWSK を公開。</string>
+    <string name="modules_permission_web_network">WebViewインターネット</string>
+    <string name="modules_permission_web_network_summary">HTTPSナビゲーションとアセットを許可。このWebViewのシェルブリッジは無効化されます。</string>
+    <string name="modules_permission_web_download">WebUI download()</string>
+    <string name="modules_permission_web_download_summary">index.html を除くファイルをWebUIフォルダにHTTPSダウンロードすることを許可。</string>
+    <string name="modules_background_actions">バックグラウンドアクションを許可</string>
+    <string name="modules_background_actions_summary">フルアクセスモード時にモジュールがバックグラウンドでADBタスクを実行することを許可</string>
+    <string name="modules_background_allowed">バックグラウンド許可済み</string>
+    <string name="modules_background_blocked">バックグラウンドブロック中</string>
+    <string name="modules_install_zip">ZIPをインストール</string>
+    <string name="modules_empty_title">モジュールがインストールされていません</string>
+    <string name="modules_empty_summary">ADBモジュールは module.prop、WebUI、action.sh、service.sh を含むKernelSU/Magisk形式のZIPを使用します。</string>
+    <string name="modules_install_success">%s をインストールしました</string>
+    <string name="modules_install_failed">インストール失敗: %s</string>
+    <string name="modules_enabled">有効</string>
+    <string name="modules_disabled">無効</string>
+    <string name="modules_enable">有効化</string>
+    <string name="modules_disable">無効化</string>
+    <string name="modules_full_trust">完全信頼</string>
+    <string name="modules_trust">信頼する</string>
+    <string name="modules_untrust">信頼を解除</string>
+    <string name="modules_run_action">アクション</string>
+    <string name="modules_run_service">サービス</string>
+    <string name="modules_running">モジュールスクリプトを実行中…</string>
+    <string name="modules_open_webui">WebUI</string>
+    <string name="modules_webui">モジュール WebUI</string>
+    <string name="modules_delete">削除</string>
+    <string name="modules_delete_title">モジュールを削除しますか？</string>
+    <string name="modules_delete_message">%s をJWSKのストレージから削除します。</string>
+    <string name="modules_action_result">アクション終了: コード %d</string>
+    <string name="modules_action_failed">アクション失敗</string>
+    <string name="modules_service_result">サービス終了: コード %d</string>
+    <string name="modules_service_failed">サービス失敗</string>
+    <string name="modules_recommand_title">ReCommand</string>
+    <string name="modules_recommand_source">%1$s / %2$s</string>
+    <string name="modules_recommand_expand">展開</string>
+    <string name="modules_recommand_collapse">折りたたむ</string>
+    <string name="modules_recommand_copy">コピー</string>
+    <string name="modules_recommand_execute">実行</string>
+    <string name="modules_recommand_close">閉じる</string>
+    <string name="modules_recommand_command_clip_label">モジュールコマンド</string>
+    <string name="modules_recommand_webui">WebUI用 ReCommand</string>
+    <string name="modules_recommand_webui_summary">WebUIでのシェル実行前に確認ダイアログを表示。</string>
+    <string name="modules_recommand_action">Action用 ReCommand</string>
+    <string name="modules_recommand_action_summary">action.sh 実行前に確認ダイアログを表示。</string>
+    <string name="modules_ai">AI</string>
+    <string name="modules_ai_api_key">APIキー</string>
+    <string name="modules_ai_api_key_summary">Android Keystoreで暗号化して保存。</string>
+    <string name="modules_ai_unlocked">AIチェッカー解除済み</string>
+    <string name="modules_ai_hidden">AIチェッカー非表示</string>
+    <string name="modules_ai_failed">AIチェック失敗: %s</string>
+    <string name="modules_tab_installed">インストール済み</string>
+    <string name="modules_tab_catalog">カタログ</string>
+    <string name="modules_check_updates">更新を確認</string>
+    <string name="modules_checking_updates">更新を確認中…</string>
+    <string name="modules_no_updates">すべてのモジュールが最新です</string>
+    <string name="modules_update_available">アップデート利用可能: v%s</string>
+    <string name="modules_update_button">更新</string>
+    <string name="modules_updating">モジュールを更新中…</string>
+    <string name="modules_update_success">モジュールを v%s に更新しました</string>
+    <string name="modules_download_downloads">ダウンロードフォルダに保存</string>
+    <string name="modules_download_install">ダウンロードしてインストール</string>
+    <string name="modules_downloading">ダウンロード中…</string>
+    <string name="modules_download_enqueued">バックグラウンドでダウンロードを開始しました</string>
+    <string name="modules_search_placeholder">カタログモジュールを検索…</string>
+
+    <!-- About -->
+    <string name="action_about">アプリについて</string>
+    <string name="about_source_code_button">ソースコード</string>
+    <string name="about_view_source_code"><![CDATA[%s でソースコードを表示]]></string>
+
+    <!-- Stop -->
+    <string name="action_stop">JWSKを停止</string>
+    <string name="dialog_stop_message">JWSKサービスを停止します。</string>
+    <string name="service_already_stopped">JWSKサービスはすでに停止しています。</string>
+    <string name="service_stop_success">JWSKサービスを停止しました。</string>
+    <string name="service_stop_still_running">サービスがまだ実行中です</string>
+    <string name="service_stop_failed">JWSKの停止に失敗しました: %1$s</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_service_status">サービス開始状態</string>
+    <string name="notification_service_starting">JWSKサービスを開始中…</string>
+    <string name="notification_service_start_failed">JWSKサービスの開始に失敗しました。</string>
+    <string name="notification_service_start_no_root">root権限の取得に失敗しました。</string>
+    <string name="notification_working">処理中…</string>
+    <string name="notification_channel_adb_pairing">ワイヤレスデバッグのペアリング</string>
+    <string name="notification_adb_pairing_input_paring_code">ペアリングコードを入力</string>
+    <string name="notification_adb_pairing_searching_for_service_title">ペアリングサービスを検索中</string>
+    <string name="notification_adb_pairing_service_found_title">ペアリングサービスを発見しました</string>
+    <string name="notification_adb_pairing_stop_searching">検索を停止</string>
+    <string name="notification_adb_pairing_working_title">ペアリング処理中</string>
+    <string name="notification_adb_pairing_succeed_title">ペアリング成功</string>
+    <string name="notification_adb_pairing_succeed_text">JWSKサービスを開始できます。</string>
+    <string name="notification_adb_pairing_failed_title">ペアリング失敗</string>
+    <string name="notification_adb_pairing_retry">再試行</string>
+
+    <!-- Permission related -->
+    <string name="permission_label">JWSKへのアクセス</string>
+    <string name="permission_description">アプリがJWSKを使用することを許可します。</string>
+    <string name="permission_warning_template"><![CDATA[<b>%1$s</b> に %2$s を許可しますか？]]></string>
+    <string name="grant_dialog_button_allow_always">常に許可</string>
+    <string name="grant_dialog_button_deny">拒否</string>
+
+    <!-- Starter -->
+    <string name="starter">スターター</string>
+    <string name="start_with_root_failed">root権限が許可されていないか、端末がroot化されていないためサービスを開始できません。</string>
+
+    <!-- Misc -->
+    <string name="dialog_cannot_open_browser_title">ブラウザを起動できません</string>
+    <string name="toast_copied_to_clipboard">%s\nをクリップボードにコピーしました。</string>
+    <string name="toast_copied_to_clipboard_with_text"><![CDATA[<b>%s</b> をクリップボードにコピーしました。]]></string>
+
+    <!-- Messages for legacy -->
+    <string name="dialog_legacy_not_support_title">%1$s は最新のJWSKに対応していません</string>
+    <string name="dialog_legacy_not_support_message"><![CDATA[旧バージョンのJWSKは2019年3月に非推奨となり、新しいAndroidでは動作しません。<p><b>%1$s</b> の開発者にアップデートを要請してください。]]></string>
+    <string name="dialog_requesting_legacy_title">%1$s が旧バージョンのJWSKを要求しています</string>
+    <string name="dialog_requesting_legacy_message"><![CDATA[<b>%1$s</b> は最新のJWSKに対応していますが、旧バージョンを要求しています。JWSKが実行されていない可能性があります。]]></string>
+    <string name="dialog_requesting_legacy_button_open_shizuku">JWSKを開く</string>
+
+    <!-- Lab Features -->
+    <string name="lab_features_title">ラボ機能</string>
+    <string name="lab_features_summary">実験的な新機能</string>
+    <string name="shizuku_connectors_title">JWSK コネクター</string>
+    <string name="shizuku_connectors_summary">プラグインによるJWSKの有効化を許可</string>
+    <string name="unsafe_warning_title">警告</string>
+    <string name="unsafe_warning_message">この機能を有効にするのは危険です。続行しますか？</string>
+    <string name="dhizuku_mode_title">Dhizuku モード</string>
+    <string name="dhizuku_mode_summary">Dhizukuと連携してJWSKを動作させることを許可</string>
+    <string name="home_dhizuku_title"><![CDATA[開始（Dhizuku経由）]]></string>
+    <string name="home_dhizuku_description"><![CDATA[Dhizuku管理下の端末では、デバイスオーナー権限を使用して直接JWSKを開始できます。]]></string>
+    <string name="dhizuku_warning_title">警告: Dhizuku モード</string>
+    <string name="dhizuku_warning_message">Dhizukuはデバイスオーナー権限用に設計されています。一部のシェルコマンドやADBコマンドが正常に動作しない場合があります。続行しますか？</string>
+    <string name="settings_tcp_mode">TCP モード</string>
+    <string name="settings_tcp_mode_summary">ADBをTCPポート5555で再起動し、ワイヤレスデバッグのポート変化に依存せず再接続。</string>
+    <string name="settings_restart_dialog_title">再起動が必要</string>
+    <string name="settings_restart_dialog_message">TCPモードの変更を適用するにはJWSKの再起動が必要です。</string>
+    <string name="settings_restart_dialog_message_wifi_required"><![CDATA[
+
+最初の再起動時にはWi-Fi接続が必要です。]]></string>
+    <string name="settings_auto_disable_usb_debugging">USBデバッグの自動無効化</string>
+    <string name="settings_auto_disable_usb_debugging_summary">JWSKが自動起動に設定されていない場合、再起動後にUSBデバッグをOFFにする</string>
+    <string name="settings_service_group">サービスの保守</string>
+
+    <!-- Lab Features - Service Behavior -->
+    <string name="lab_service_behavior_title">サービスの挙動</string>
+    <string name="lab_keep_alive_title">サービスを常時有効化</string>
+    <string name="lab_keep_alive_summary">JWSKサービスの実行状態を定期的にチェックし、必要に応じて自動再起動</string>
+    <string name="lab_auto_restart_title">クラッシュ時に自動再起動</string>
+    <string name="lab_auto_restart_summary">JWSKサービスが予期せず終了した場合、自動的に再起動を試みる</string>
+    <string name="lab_notify_death_title">サービス停止時に通知</string>
+    <string name="lab_notify_death_summary">JWSKサービスが予期せず停止した際に通知を表示</string>
+
+    <!-- Lab Features - Debugging -->
+    <string name="lab_debugging_title">デバッグ</string>
+    <string name="lab_verbose_logging_title">詳細ログ出力</string>
+    <string name="lab_verbose_logging_summary">Logcatに詳細なデバッグログを出力。バッテリー節約のため本番環境ではオフにしてください</string>
+    <string name="notification_channel_watchdog">サービス監視</string>
+    <string name="notification_watchdog_title">JWSKサービスが停止しました</string>
+    <string name="notification_watchdog_text">JWSKサービスが予期せず停止しました。</string>
+    <string name="watchdog_service_title">JWSK監視機能がアクティブです</string>
+    <string name="watchdog_service_text">常時有効化のためJWSKサービスを監視中</string>
+
+    <!-- JWSK Control Notification -->
+    <string name="notification_control_channel_name">JWSK コントロール</string>
+    <string name="notification_control_title_running">JWSKは実行中です</string>
+    <string name="notification_control_title_stopped">JWSKは停止しています</string>
+    <string name="notification_control_text_running">タップしてJWSKを開くか、展開して停止します。</string>
+    <string name="notification_control_text_stopped">タップしてJWSKを開くか、展開して開始します。</string>
+    <string name="notification_control_action_start">開始</string>
+    <string name="notification_control_action_stop">停止</string>
+
+    <!-- Update Settings -->
+    <string name="update_settings_title">アップデート設定</string>
+    <string name="update_settings_catalog">モジュールカタログ</string>
+    <string name="update_settings_catalog_enabled">カタログを有効化</string>
+    <string name="update_settings_catalog_enabled_summary">GitHub Topicsから検出されたモジュールを表示</string>
+    <string name="update_settings_frequency">アップデート確認頻度</string>
+    <string name="update_settings_frequency_label">アップデートの確認</string>
+    <string name="update_settings_frequency_manual">手動</string>
+    <string name="update_settings_frequency_daily">毎日</string>
+    <string name="update_settings_frequency_weekly">毎週</string>
+    <string name="update_settings_install_mode">インストールモード</string>
+    <string name="update_settings_install_mode_label">デフォルトのインストール方法</string>
+    <string name="update_settings_install_mode_sources">ソースからビルド</string>
+    <string name="update_settings_install_mode_release">リリースZIPをダウンロード</string>
+    <string name="update_settings_github">GitHub</string>
+    <string name="update_settings_github_pat">個人アクセストークン</string>
+    <string name="update_settings_github_pat_set">トークン設定済み</string>
+    <string name="update_settings_github_pat_unset">未設定（60リクエスト/時間）</string>
+    <string name="update_settings_github_pat_title">GitHub 個人アクセストークン</string>
+    <string name="update_settings_github_pat_description">任意。GitHubトークンを設定するとAPI制限が60から5000リクエスト/時間に大幅増加します。</string>
+    <string name="update_settings_github_pat_label">トークン</string>
+    <string name="update_settings_github_pat_show">表示</string>
+    <string name="update_settings_github_pat_hide">非表示</string>
+    <string name="update_settings_github_pat_clear">クリア</string>
+    <string name="update_settings_github_pat_delete">トークンを削除</string>
+    <string name="update_settings_github_pat_delete_summary">保存されているGitHubトークンを削除</string>
+
+    <!-- Module Catalog -->
+    <string name="modules_catalog">カタログ</string>
+    <string name="modules_catalog_title">モジュールカタログ</string>
+    <string name="modules_catalog_empty">モジュールが見つかりません</string>
+    <string name="modules_catalog_sort_newest">新着順</string>
+    <string name="modules_catalog_sort_oldest">古い順</string>
+    <string name="modules_catalog_sort_stars">スター順</string>
+    <string name="modules_catalog_sort_official">公式</string>
+    <string name="modules_catalog_install_sources">ソースからインストール</string>
+    <string name="modules_catalog_install_release">リリースZIPをダウンロード</string>
+    <string name="modules_catalog_install_description">インストール方法を選択してください:</string>
+    <string name="modules_catalog_install_success">モジュールのインストールに成功しました</string>
+    <string name="modules_catalog_install_failed">インストール失敗: %s</string>
+    <string name="modules_catalog_token_required">GitHubトークンが必要です</string>
+    <string name="modules_catalog_token_hint">GitHub 個人アクセストークン</string>
+    <string name="modules_catalog_token_description">GitHub上のモジュール検索にトークンが必要です。</string>
+    <string name="modules_catalog_token_format_warning">トークンは ghp_ または github_pat_ で始まる必要があります</string>
+    <string name="modules_catalog_loading">カタログを読み込み中…</string>
+    <string name="modules_catalog_error">カタログの読み込みに失敗しました</string>
+    <string name="modules_catalog_install">インストール</string>
+    <string name="modules_catalog_installing">インストール中…</string>
+    <string name="modules_catalog_view_github">GitHubで表示</string>
+    <string name="modules_catalog_skip_token">スキップ</string>
+    <string name="modules_catalog_open">カタログを開く</string>
+
+    <!-- TV Status -->
+    <string name="tv_status_active">アクティブ</string>
+    <string name="tv_status_disabled">無効</string>
+    <string name="tv_status_trusted">信頼済み</string>
+
+    <!-- Wear Catalog -->
+    <string name="wear_catalog_sort_newest">新着順</string>
+    <string name="wear_catalog_sort_stars">スター順</string>
+    <string name="wear_catalog_sort_official">公式</string>
+    <string name="wear_catalog_sort_by">並び替え</string>
+    <string name="wear_catalog_filter">フィルター</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_restore_title">バックアップと復元</string>
+    <string name="backup_title">設定とモジュールをバックアップ</string>
+    <string name="backup_summary">設定とモジュールをZIPファイルにエクスポート</string>
+    <string name="restore_title">設定とモジュールを復元</string>
+    <string name="restore_summary">設定とモジュールをZIPファイルからインポート</string>
+
+    <!-- Comput Console -->
+    <string name="comput_title">Comput</string>
+    <string name="comput_settings">Comput コンソール設定</string>
+    <string name="comput_adb_console">ADB Comput コンソール</string>
+    <string name="comput_recommand_title">Comput用 ReCommand</string>
+    <string name="comput_recommand_summary">Computコンソールでのコマンド実行前に確認ダイアログを表示</string>
+    <string name="comput_recommand_confirmation">ComputでこのADBコマンドを実行してもよろしいですか？</string>
+    <string name="comput_ai_api_key_empty">Google AI Studio APIキーが未設定です。JWSK設定で設定してください。</string>
+    <string name="comput_ai_api_key_title">Google AI Studio APIキー</string>
+    <string name="comput_ai_api_key_not_configured">未設定 (Gemini AIは機能しません)</string>
+    <string name="comput_gemini_model_title">Gemini AI モデル</string>
+    <string name="comput_gemini_explain">Gemini 解説</string>
+    <string name="comput_api_key_label">APIキー</string>
+    <string name="comput_show_api_key">キーを表示</string>
+    <string name="comput_hide_api_key">キーを非表示</string>
+    <string name="comput_gemini_model_performance">コーディングおよびエージェント向け高性能モデル（推奨）</string>
+    <string name="comput_gemini_model_lightweight">高速軽量モデル</string>
+    <string name="comput_gemini_api_error">Gemini APIエラー %1$d: %2$s</string>
+    <string name="comput_gemini_connection_error">接続エラー。</string>
+    <string name="comput_gemini_failed">Gemini APIに接続できませんでした: %1$s</string>
+    <string name="comput_gemini_no_details">詳細なし。</string>
+    <string name="comput_sh_mode">sh モード</string>
+    <string name="comput_adb_mode">adb モード</string>
+    <string name="comput_command_label">コマンド</string>
+    <string name="comput_command_placeholder">例: pm list packages</string>
+    <string name="comput_run">実行</string>
+    <string name="comput_clear">消去</string>
+    <string name="comput_console_cleared">コンソールを消去しました。</string>
+    <string name="comput_console_output">コンソール出力</string>
+    <string name="comput_output_copied">出力をクリップボードにコピーしました</string>
+    <string name="comput_copy_output">出力をコピー</string>
+    <string name="comput_ask_gemini">Geminiに質問</string>
+    <string name="comput_executing">実行中: %1$s ...</string>
+    <string name="comput_adb_translate">ADBコマンド翻訳モードアクティブ\nオリジナル: %1$s\n実行中...</string>
+    <string name="comput_command_no_output">出力なしで終了しました。</string>
+    <string name="comput_timed_out">[E] 120秒後にコマンドがタイムアウトしました。</string>
+    <string name="comput_exit_code">[E] コード %1$d で終了しました。</string>
+    <string name="comput_running_macro">マクロを実行中: %1$s</string>
+    <string name="comput_executing_cmd">> コマンド実行中: %1$s</string>
+    <string name="comput_error_not_running">エラー: 特権JWSKサービスが実行されていません。先にサービスを開始してください。</string>
+    <string name="comput_error_no_binder">エラー: JWSKバインダーを取得できませんでした。</string>
+    <string name="comput_console_initialized">コンソールが初期化されました。特権JWSKサービスに接続完了。\n準備完了。</string>
+    <string name="comput_ai_explanation">AIによる解説</string>
+    <string name="comput_commandium">Commandium</string>
+    <string name="comput_commandium_assistant">Commandium AI アシスタント</string>
+    <string name="comput_commandium_description">自然言語でシェルコマンドを生成します。Geminiが直接使用可能なコマンドを生成します。</string>
+    <string name="comput_commandium_label">どのようなコマンドが必要ですか？</string>
+    <string name="comput_commandium_placeholder">例: /sdcard 内の 10MB 以上のファイルをすべて検索</string>
+    <string name="comput_ask_commandium">Commandiumに尋ねる</string>
+    <string name="comput_generated_command">生成されたコマンド:</string>
+    <string name="comput_command_pasted">コマンドを入力欄に貼り付けました</string>
+    <string name="comput_use_command">コマンドを使用</string>
+    <string name="comput_copied_to_clipboard">クリップボードにコピーしました</string>
+    <string name="comput_copy_command">コマンドをコピー</string>
+    <string name="comput_console_macros">コンソールマクロ</string>
+    <string name="comput_stop">停止 (%1$d)</string>
+    <string name="comput_record_macro">マクロを録画</string>
+    <string name="comput_recording_active">録画中。メイン入力からコマンドを実行してマクロに追加してください。</string>
+    <string name="comput_saved_macros">保存済みマクロ</string>
+    <string name="comput_no_macros">保存されたマクロはありません。「マクロを録画」をクリックして開始してください。</string>
+    <string name="comput_delete">削除</string>
+    <string name="comput_recommand_confirmation_title">ReCommand 確認</string>
+    <string name="comput_execute">実行</string>
+    <string name="comput_cancel">キャンセル</string>
+    <string name="comput_save_macro">マクロを保存</string>
+    <string name="comput_save_macro_hint">録画したマクロの名前を入力してください:</string>
+    <string name="comput_macro_name_label">マクロ名</string>
+    <string name="comput_save">保存</string>
+    <string name="diagnostics_app">アプリ</string>
+    <string name="diagnostics_android">Android</string>
+    <string name="diagnostics_service">サービス</string>
+    <string name="diagnostics_server_uid">サーバー UID</string>
+    <string name="diagnostics_server_api">サーバー API</string>
+    <string name="diagnostics_selinux">SELinux</string>
+    <string name="diagnostics_adb_permission">ADB権限</string>
+    <string name="diagnostics_authorized_apps">許可済みアプリ</string>
+    <string name="diagnostics_local_network">ローカルネットワーク</string>
+    <string name="diagnostics_running">実行中</string>
+    <string name="diagnostics_stopped">停止中</string>
+    <string name="diagnostics_granted">許可済み</string>
+    <string name="diagnostics_missing">未許可</string>
+    <string name="diagnostics_not_required">不要</string>
+    <string name="diagnostics_full">フル</string>
+    <string name="diagnostics_limited">制限付き</string>
+    <string name="diagnostics_unknown">不明</string>
+
+    <!-- ErrorProtect & TCP 5555 -->
+    <string name="error_protect_title">ErrorProtect</string>
+    <string name="error_protect_summary">プロセスの健全性とエラーを10秒ごとに監視。問題を検知するとJWSKを自動再起動します。</string>
+    <string name="settings_tcp_5555_title">TCP 5555 バインド</string>
+    <string name="settings_tcp_5555_summary">ローカルADBサーバーをポート5555にバインドし、ワイヤレスデバッグのポート変動なしで接続維持。</string>
+    <string name="settings_tcp_5555_button">5555にバインド</string>
+    <string name="settings_tcp_5555_bind_success">ADBサーバーをTCP 5555ポートにバインドしました</string>
+    <string name="settings_tcp_5555_bind_failed">ADBの5555ポートへのバインドに失敗しました: %1$s</string>
+    <string name="settings_tcp_5555_bind_failed_generic">Root、Dhizuku、またはアクティブなJWSKが必要です。</string>
+</resources>

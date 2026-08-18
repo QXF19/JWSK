@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="translation_contributors">NoelFeijooIglesias &amp; Community</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_navigate_up">Navegar hacia arriba</string>
+    <string name="accessibility_close">Cerrar</string>
+    <string name="accessibility_more_options">Más opciones</string>
+    <string name="accessibility_open_on_github">Abrir en GitHub</string>
+
+    <!-- Home - Status -->
+    <string name="home_status_service_is_running">%1$s se está ejecutando</string>
+    <string name="home_status_service_not_running">%1$s no se está ejecutando</string>
+    <string name="home_status_service_version">Versión %2$s, %1$s</string>
+    <string name="home_status_service_version_update"><![CDATA[Versión %2$s, %1$s<br>Reinicie para actualizar a la versión %3$s]]></string>
+
+    <!-- Home - Adb -->
+    <string name="home_adb_title"><![CDATA[Iniciar conectando a un ordenador]]></string>
+    <string name="home_adb_description"><![CDATA[En dispositivos sin root, necesita ADB para iniciar JWSK (requiere conexión a un ordenador). Este proceso debe repetirse tras reiniciar el dispositivo. Por favor <b><a href=\"%1$s\">lea la ayuda</a></b>.]]></string>
+    <string name="home_adb_button_view_help">Leer ayuda</string>
+    <string name="home_adb_button_view_command">Ver comando</string>
+    <string name="home_adb_dialog_view_command_message"><![CDATA[<font face="monospace">%1$s</font><br><br>* Existen otras consideraciones, por favor confirme que ha leído la ayuda primero.]]></string>
+    <string name="home_adb_dialog_view_command_copy_button">Copiar</string>
+    <string name="home_adb_dialog_view_command_button_send">Enviar</string>
+
+    <!-- Home - Wireless Adb -->
+    <string name="home_wireless_adb_title"><![CDATA[Iniciar mediante depuración inalámbrica]]></string>
+    <string name="home_wireless_adb_description"><![CDATA[En Android 11 o superior, puede activar la depuración inalámbrica e iniciar JWSK directamente desde su dispositivo sin necesidad de un ordenador.<p>Por favor revise la guía paso a paso.]]></string>
+    <string name="home_wireless_adb_description_pre_11"><![CDATA[En versiones anteriores a Android 11, se requiere conexión a un ordenador para activar la depuración inalámbrica.]]></string>
+    <string name="home_wireless_adb_view_guide_button">Guía paso a paso</string>
+    <string name="home_local_network_title">Acceso a red local</string>
+    <string name="home_local_network_description">La depuración inalámbrica necesita %1$s en esta versión de Android.</string>
+    <string name="home_local_network_granted">%1$s está concedido.</string>
+    <string name="home_local_network_missing">%1$s no está concedido.</string>
+    <string name="home_local_network_grant">Conceder acceso</string>
+    <string name="home_local_network_permission_denied">Se requiere acceso a la red local para la depuración inalámbrica.</string>
+
+    <!-- Adb -->
+    <string name="dialog_adb_discovery">Buscando servicio de depuración inalámbrica</string>
+    <string name="dialog_adb_discovery_message">Por favor active \"Depuración inalámbrica\" en \"Opciones de desarrollador\". La depuración inalámbrica se desactiva automáticamente al cambiar de red.\n\nNota: no desactive \"Opciones de desarrollador\" ni \"Depuración por USB\", o JWSK se detendrá.</string>
+    <string name="dialog_adb_discovery_message_toggle_wireless_debugging">Por favor intente desactivar y volver a activar \"Depuración inalámbrica\" si la búsqueda continúa.</string>
+    <string name="dialog_adb_port">Puerto</string>
+    <string name="dialog_adb_invalid_port">El puerto debe ser un número entero entre 1 y 65535.</string>
+    <string name="adb_pairing">Emparejamiento</string>
+    <string name="dialog_adb_pairing_title">Emparejar con el dispositivo</string>
+    <string name="dialog_adb_pairing_discovery">Buscando servicio de emparejamiento</string>
+    <string name="dialog_adb_pairing_paring_code">Código de emparejamiento</string>
+    <string name="paring_code_is_wrong">El código de emparejamiento es incorrecto.</string>
+    <string name="cannot_connect_port">No se pudo conectar al servicio de depuración inalámbrica.</string>
+    <string name="dialog_wireless_adb_not_enabled">La depuración inalámbrica no está activada.\nNota: antes de Android 11, se requiere conexión a un ordenador para activarla.</string>
+    <string name="dialog_adb_pairing_message">Inicie el emparejamiento siguiendo estos pasos: \"Opciones de desarrollador\" - \"Depuración inalámbrica\" - \"Emparejar dispositivo con código de emparejamiento\".\n\nUna vez iniciado, podrá introducir el código.</string>
+    <string name="adb_pairing_requires_multi_window">Por favor active primero el modo de pantalla dividida (multiventana).</string>
+    <string name="adb_pairing_requires_multi_window_reason">El sistema requiere que el diálogo de emparejamiento esté visible en todo momento. Usar pantalla dividida es la única forma de mantener visibles esta app y el diálogo del sistema simultáneamente.</string>
+    <string name="adb_error_key_store">No se pudo generar la clave de depuración inalámbrica.\nEsto puede deberse a que el almacén de claves (KeyStore) de este dispositivo esté dañado.</string>
+    <string name="adb_pair_required">Por favor complete primero el paso de emparejamiento.</string>
+    <string name="development_settings">Opciones de desarrollador</string>
+    <string name="notification_settings">Opciones de notificación</string>
+    <string name="adb_pairing_tutorial_title">Emparejar JWSK con su dispositivo</string>
+    <string name="adb_pairing_tutorial_content_notification">Una notificación de JWSK le ayudará a completar el emparejamiento.</string>
+    <string name="adb_pairing_tutorial_content_steps">Vaya a \"Opciones de desarrollador\" - \"Depuración inalámbrica\". Toque \"Emparejar dispositivo con código de emparejamiento\", verá un código de seis dígitos.</string>
+    <string name="adb_pairing_tutorial_content_enter_pairing_code">Introduzca el código en la notificación para completar el emparejamiento.</string>
+    <string name="adb_pairing_tutorial_content_notification_blocked">El emparejamiento requiere interactuar con una notificación de JWSK. Por favor permita que JWSK envíe notificaciones.</string>
+    <string name="adb_pairing_tutorial_content_miui">Los usuarios de MIUI pueden necesitar cambiar el estilo de notificación a \"Android\" en \"Ajustes\" - \"Notificaciones\" - \"Barra de notificaciones\".</string>
+    <string name="adb_pairing_tutorial_content_miui_2">De lo contrario, no podrá introducir el código de emparejamiento desde la notificación.</string>
+    <string name="adb_pairing_tutorial_content_left_is_clickable">Tenga en cuenta que la parte izquierda de \"Depuración inalámbrica\" es pulsable y abre una nueva página. Activar solo el interruptor de la derecha no es suficiente.</string>
+    <string name="adb_pairing_tutorial_content_finish">Vuelva a JWSK e inicie el servicio.</string>
+    <string name="adb_pairing_tutorial_content_network">JWSK necesita acceder a la red local. Esto se controla mediante el permiso de red.</string>
+    <string name="adb_pairing_tutorial_content_network_limation_not_foreground">Algunos sistemas (como MIUI) restringen el acceso a red cuando las apps no están visibles, aunque usen servicios en primer plano. Desactive las optimizaciones de batería para JWSK.</string>
+
+    <!-- Home - Root -->
+    <string name="home_root_title"><![CDATA[Iniciar (para dispositivos con root)]]></string>
+    <string name="home_root_description"><![CDATA[Además, JWSK puede iniciarse automáticamente al encender el dispositivo. Si no es así, compruebe si el sistema o herramientas de terceros han restringido JWSK.<br>Puede consultar %s.]]></string>
+    <string name="home_root_description_sui"><![CDATA[Si usa Magisk, puede probar %1$s. Para usuarios root, eventualmente reemplazará a JWSK. Note que las apps existentes deben adaptarse para usar %2$s.]]></string>
+    <string name="home_root_button_start">Iniciar</string>
+    <string name="home_root_button_restart">Reiniciar</string>
+
+    <!-- Home - Application management -->
+    <string name="home_app_management_title">Gestión de aplicaciones</string>
+    <plurals name="home_app_management_authorized_apps_count">
+        <item quantity="one"><![CDATA[%d aplicación autorizada]]></item>
+        <item quantity="other"><![CDATA[%d aplicaciones autorizadas]]></item>
+    </plurals>
+    <string name="home_app_management_view_authorized_apps"><![CDATA[Toque para gestionar aplicaciones autorizadas]]></string>
+    <string name="home_app_management_empty">Las aplicaciones que soliciten o declaren JWSK aparecerán aquí.</string>
+
+    <!-- Home - Learn more -->
+    <string name="home_learn_more_title">Aprender sobre JWSK</string>
+    <string name="home_learn_more_description">Aprenda a desarrollar con JWSK</string>
+
+    <!-- Home - Diagnostics -->
+    <string name="home_refresh">Actualizar</string>
+    <string name="home_diagnostics_title">Diagnóstico</string>
+    <string name="home_diagnostics_copy">Copiar diagnóstico</string>
+    <string name="home_diagnostics_copied">Diagnóstico copiado al portapapeles.</string>
+    <string name="home_modules_description">Instalar y gestionar módulos ADB</string>
+
+    <!-- Home - Adb permissions limited -->
+    <string name="home_adb_is_limited_title">Paso adicional requerido</string>
+    <string name="home_adb_is_limited_description">El fabricante de su dispositivo ha restringido los permisos de ADB y las apps que usan JWSK no funcionarán correctamente.\n\nPor lo general, esta limitación se corrige ajustando opciones en \"Opciones de desarrollador\". Consulte la ayuda para más detalles.\n\nEs posible que deba reiniciar JWSK.</string>
+
+    <!-- Application management -->
+    <string name="app_management_select_all">Seleccionar todo</string>
+    <string name="app_management_deselect_all">Deseleccionar todo</string>
+    <string name="app_management_dialog_adb_is_limited_title">El permiso de ADB está limitado</string>
+    <string name="app_management_dialog_adb_is_limited_message"><![CDATA[Es muy probable que el fabricante de su dispositivo limite los permisos de ADB.<p>Puede encontrar una solución en <b><a href=\"%1$s\">este documento</a></b>.]]></string>
+    <string name="app_management_item_summary_requires_root">* requiere que JWSK se ejecute con root</string>
+
+    <!-- Terminal -->
+    <string name="home_terminal_title">Usar JWSK en aplicaciones de terminal</string>
+    <string name="home_terminal_description">Ejecute comandos con JWSK en sus aplicaciones de terminal favoritas</string>
+    <string name="terminal_tutorial_1">Primero, exporte los archivos a cualquier ubicación. Encontrará dos archivos: %1$s y %2$s.</string>
+    <string name="terminal_tutorial_1_description">Si existen archivos con el mismo nombre en la carpeta seleccionada, serán sobrescritos.\n\nLa función de exportación usa SAF (Storage Access Framework). En MIUI, SAF puede presentar fallos; si es así, extraiga el archivo del APK de JWSK o descárguelo de GitHub.</string>
+    <string name="terminal_export_files">Exportar archivos</string>
+    <string name="terminal_tutorial_2">Luego, use cualquier editor de texto para abrir y editar %1$s.</string>
+    <string name="terminal_tutorial_2_description">Por ejemplo, si desea usar JWSK en %1$s, reemplace %2$s con %3$s (%4$s es el nombre de paquete de %1$s).</string>
+    <string name="terminal_tutorial_3">Por último, mueva los archivos a un directorio accesible por su aplicación de terminal para ejecutar comandos con %1$s.</string>
+    <string name="terminal_tutorial_3_description">Consejo: otorgue permisos de ejecución a %1$s y añádalo a %2$s para usar %1$s directamente.</string>
+    <string name="rish_description"><![CDATA[Con %1$s, en cualquier app de terminal, puede conectarse e interactuar con la consola abierta por JWSK.<p>Para uso detallado sobre %1$s, toque para ver la documentación.]]></string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_user_interface">Apariencia</string>
+    <string name="settings_black_night_theme">Tema negro puro</string>
+    <string name="settings_black_night_theme_summary">Usar fondo negro puro cuando el modo oscuro está activo</string>
+    <string name="settings_startup">Inicio</string>
+    <string name="settings_translation_contributors">Colaboradores de traducción</string>
+    <string name="settings_translation">Participar en la traducción</string>
+    <string name="settings_translation_summary">Ayúdenos a traducir %s a su idioma</string>
+    <string name="settings_start_on_boot">Iniciar al arrancar</string>
+    <string name="settings_start_on_boot_summary">JWSK se iniciará automáticamente al encender el dispositivo tras ejecutarse con éxito.</string>
+    <string name="settings_use_system_color">Usar colores del sistema</string>
+
+    <!-- ADB modules -->
+    <string name="modules_title">Módulos ADB</string>
+    <string name="modules_settings_title">Módulos</string>
+    <string name="modules_settings_summary">Instale módulos ZIP y ejecute sus acciones mediante el servidor ADB/root de JWSK</string>
+    <string name="modules_header_summary">%1$d instalados, %2$d activados</string>
+    <string name="modules_version_label">Versión: %s</string>
+    <string name="modules_author_label">Autor: %s</string>
+    <string name="modules_access_mode">Modo de acceso de módulos</string>
+    <string name="modules_access_mode_safe">Seguro</string>
+    <string name="modules_access_mode_safe_summary">Sin puente de comandos, sin descargas WebUI, sin acciones ni servicios.</string>
+    <string name="modules_access_mode_custom">Personalizado</string>
+    <string name="modules_access_mode_custom_summary">Configure manualmente los permisos de acciones, servicios, WebUI, red y descargas.</string>
+    <string name="modules_access_mode_full">Acceso total</string>
+    <string name="modules_access_mode_full_summary">Permite puente de comandos, acciones, servicios y descargas WebUI. Internet en WebView permanece bloqueado.</string>
+    <string name="modules_custom_permissions">Permisos personalizados</string>
+    <string name="modules_custom_permissions_summary">Configurar cada permiso de módulo de forma independiente</string>
+    <string name="modules_permission_action">Ejecutar Acción</string>
+    <string name="modules_permission_action_summary">Permitir ejecución manual de action.sh.</string>
+    <string name="modules_permission_service">Ejecutar Servicio</string>
+    <string name="modules_permission_service_summary">Permitir service.sh cuando las acciones en segundo plano estén activadas.</string>
+    <string name="modules_permission_web_bridge">Puente de comandos WebUI</string>
+    <string name="modules_permission_web_bridge_summary">Exponer window.JWSK solo para WebUI local y sin internet en WebView.</string>
+    <string name="modules_permission_web_network">Internet en WebView</string>
+    <string name="modules_permission_web_network_summary">Permitir HTTPS para navegación y recursos. Desactiva el puente de comandos en esa WebView.</string>
+    <string name="modules_permission_web_download">download() en WebUI</string>
+    <string name="modules_permission_web_download_summary">Permitir descarga HTTPS de archivos en la carpeta WebUI, excepto index.html.</string>
+    <string name="modules_background_actions">Permitir acciones en segundo plano</string>
+    <string name="modules_background_actions_summary">Permitir a los módulos instalados solicitar tareas ADB en segundo plano en modo acceso total</string>
+    <string name="modules_background_allowed">Segundo plano permitido</string>
+    <string name="modules_background_blocked">Segundo plano bloqueado</string>
+    <string name="modules_install_zip">Instalar ZIP</string>
+    <string name="modules_empty_title">No hay módulos instalados</string>
+    <string name="modules_empty_summary">Los módulos ADB usan un paquete ZIP estilo KernelSU/Magisk con module.prop, banner opcional, WebUI, action.sh y service.sh.</string>
+    <string name="modules_install_success">Instalado %s</string>
+    <string name="modules_install_failed">Fallo de instalación: %s</string>
+    <string name="modules_enabled">Activado</string>
+    <string name="modules_disabled">Desactivado</string>
+    <string name="modules_enable">Activar</string>
+    <string name="modules_disable">Desactivar</string>
+    <string name="modules_full_trust">Confianza total</string>
+    <string name="modules_trust">Confiar</string>
+    <string name="modules_untrust">Desconfiar</string>
+    <string name="modules_run_action">Acción</string>
+    <string name="modules_run_service">Servicio</string>
+    <string name="modules_running">Ejecutando script del módulo…</string>
+    <string name="modules_open_webui">WebUI</string>
+    <string name="modules_webui">WebUI del módulo</string>
+    <string name="modules_delete">Eliminar</string>
+    <string name="modules_delete_title">¿Eliminar módulo?</string>
+    <string name="modules_delete_message">%s será eliminado del almacenamiento de JWSK.</string>
+    <string name="modules_action_result">Acción finalizada: código %d</string>
+    <string name="modules_action_failed">Fallo en la acción</string>
+    <string name="modules_service_result">Servicio finalizado: código %d</string>
+    <string name="modules_service_failed">Fallo en el servicio</string>
+    <string name="modules_recommand_title">ReCommand</string>
+    <string name="modules_recommand_source">%1$s / %2$s</string>
+    <string name="modules_recommand_expand">Expandir</string>
+    <string name="modules_recommand_collapse">Contraer</string>
+    <string name="modules_recommand_copy">Copiar</string>
+    <string name="modules_recommand_execute">Ejecutar</string>
+    <string name="modules_recommand_close">Cerrar</string>
+    <string name="modules_recommand_command_clip_label">Comando de módulo</string>
+    <string name="modules_recommand_webui">ReCommand para WebUI</string>
+    <string name="modules_recommand_webui_summary">Mostrar diálogo de confirmación antes de ejecutar comandos desde WebUI.</string>
+    <string name="modules_recommand_action">ReCommand para Acción</string>
+    <string name="modules_recommand_action_summary">Mostrar diálogo de confirmación antes de ejecutar action.sh.</string>
+    <string name="modules_ai">IA</string>
+    <string name="modules_ai_api_key">Clave de API</string>
+    <string name="modules_ai_api_key_summary">Almacenada de forma encriptada en Android Keystore.</string>
+    <string name="modules_ai_unlocked">Comprobador IA desbloqueado</string>
+    <string name="modules_ai_hidden">Comprobador IA oculto</string>
+    <string name="modules_ai_failed">Fallo en comprobación IA: %s</string>
+    <string name="modules_tab_installed">Instalados</string>
+    <string name="modules_tab_catalog">Catálogo</string>
+    <string name="modules_check_updates">Buscar actualizaciones</string>
+    <string name="modules_checking_updates">Buscando actualizaciones…</string>
+    <string name="modules_no_updates">Todos los módulos están actualizados</string>
+    <string name="modules_update_available">Actualización disponible: v%s</string>
+    <string name="modules_update_button">Actualizar</string>
+    <string name="modules_updating">Actualizando módulo…</string>
+    <string name="modules_update_success">Módulo actualizado a v%s</string>
+    <string name="modules_download_downloads">Descargar en Descargas</string>
+    <string name="modules_download_install">Descargar e instalar</string>
+    <string name="modules_downloading">Descargando…</string>
+    <string name="modules_download_enqueued">Descarga iniciada en segundo plano</string>
+    <string name="modules_search_placeholder">Buscar módulos en el catálogo…</string>
+
+    <!-- About -->
+    <string name="action_about">Acerca de</string>
+    <string name="about_source_code_button">Código fuente</string>
+    <string name="about_view_source_code"><![CDATA[Ver código fuente en %s]]></string>
+
+    <!-- Stop -->
+    <string name="action_stop">Detener JWSK</string>
+    <string name="dialog_stop_message">El servicio de JWSK se detendrá.</string>
+    <string name="service_already_stopped">El servicio de JWSK ya está detenido.</string>
+    <string name="service_stop_success">Servicio de JWSK detenido.</string>
+    <string name="service_stop_still_running">El servicio continúa ejecutándose</string>
+    <string name="service_stop_failed">Error al detener JWSK: %1$s</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_service_status">Estado de inicio del servicio</string>
+    <string name="notification_service_starting">Iniciando servicio JWSK…</string>
+    <string name="notification_service_start_failed">Error al iniciar servicio JWSK.</string>
+    <string name="notification_service_start_no_root">Error al solicitar permiso de root.</string>
+    <string name="notification_working">Procesando…</string>
+    <string name="notification_channel_adb_pairing">Emparejamiento de depuración inalámbrica</string>
+    <string name="notification_adb_pairing_input_paring_code">Introducir código de emparejamiento</string>
+    <string name="notification_adb_pairing_searching_for_service_title">Buscando servicio de emparejamiento</string>
+    <string name="notification_adb_pairing_service_found_title">Servicio de emparejamiento encontrado</string>
+    <string name="notification_adb_pairing_stop_searching">Detener búsqueda</string>
+    <string name="notification_adb_pairing_working_title">Emparejamiento en curso</string>
+    <string name="notification_adb_pairing_succeed_title">Emparejamiento completado</string>
+    <string name="notification_adb_pairing_succeed_text">Ya puede iniciar el servicio JWSK.</string>
+    <string name="notification_adb_pairing_failed_title">Fallo de emparejamiento</string>
+    <string name="notification_adb_pairing_retry">Reintentar</string>
+
+    <!-- Permission related -->
+    <string name="permission_label">acceso a JWSK</string>
+    <string name="permission_description">Permitir a la aplicación usar JWSK.</string>
+    <string name="permission_warning_template"><![CDATA[¿Permitir a <b>%1$s</b> acceder a %2$s?]]></string>
+    <string name="grant_dialog_button_allow_always">Permitir siempre</string>
+    <string name="grant_dialog_button_deny">Denegar</string>
+
+    <!-- Starter -->
+    <string name="starter">Arrancador</string>
+    <string name="start_with_root_failed">No se puede iniciar el servicio porque no se otorgó permiso de root o el dispositivo no está rooteado.</string>
+
+    <!-- Misc -->
+    <string name="dialog_cannot_open_browser_title">No se puede abrir el navegador</string>
+    <string name="toast_copied_to_clipboard">%s\nse ha copiado al portapapeles.</string>
+    <string name="toast_copied_to_clipboard_with_text"><![CDATA[<b>%s</b> se ha copiado al portapapeles.]]></string>
+
+    <!-- Messages for legacy -->
+    <string name="dialog_legacy_not_support_title">%1$s no es compatible con JWSK moderno</string>
+    <string name="dialog_legacy_not_support_message"><![CDATA[JWSK Legacy quedó en desuso en marzo de 2019 y no funciona en sistemas Android recientes.<p>Por favor pida al desarrollador de <b>%1$s</b> que actualice su app.]]></string>
+    <string name="dialog_requesting_legacy_title">%1$s solicita JWSK Legacy</string>
+    <string name="dialog_requesting_legacy_message"><![CDATA[<b>%1$s</b> es compatible con JWSK moderno, pero está solicitando JWSK Legacy. Esto puede suceder si JWSK no se está ejecutando.<p>JWSK Legacy quedó en desuso en marzo de 2019.]]></string>
+    <string name="dialog_requesting_legacy_button_open_shizuku">Abrir JWSK</string>
+
+    <!-- Lab Features -->
+    <string name="lab_features_title">Funciones de laboratorio</string>
+    <string name="lab_features_summary">Características experimentales</string>
+    <string name="shizuku_connectors_title">Conectores JWSK</string>
+    <string name="shizuku_connectors_summary">Permitir que complementos activen JWSK</string>
+    <string name="unsafe_warning_title">Advertencia</string>
+    <string name="unsafe_warning_message">Activar esta función es INSEGURO. ¿Desea continuar?</string>
+    <string name="dhizuku_mode_title">Modo Dhizuku</string>
+    <string name="dhizuku_mode_summary">Permitir a JWSK operar mediante vinculación con Dhizuku</string>
+    <string name="home_dhizuku_title"><![CDATA[Iniciar (vía Dhizuku)]]></string>
+    <string name="home_dhizuku_description"><![CDATA[Para dispositivos gestionados por Dhizuku, puede iniciar JWSK usando privilegios de Propietario del dispositivo.]]></string>
+    <string name="dhizuku_warning_title">Advertencia: Modo Dhizuku</string>
+    <string name="dhizuku_warning_message">Dhizuku está diseñado para privilegios de administrador/propietario. Es posible que varios comandos de consola y ADB no funcionen o no sean compatibles mediante Dhizuku. ¿Desea continuar?</string>
+    <string name="settings_tcp_mode">Modo TCP</string>
+    <string name="settings_tcp_mode_summary">Reiniciar servidor ADB en puerto TCP 5555 para reconectar sin depender de cambios de puerto en depuración inalámbrica.</string>
+    <string name="settings_restart_dialog_title">Reinicie requerido</string>
+    <string name="settings_restart_dialog_message">JWSK necesita reiniciarse para aplicar el modo TCP.</string>
+    <string name="settings_restart_dialog_message_wifi_required"><![CDATA[
+
+Se requiere conexión Wi-Fi en el primer reinicio para que JWSK se conecte al puerto de depuración inalámbrica actual antes de cambiar ADB a 5555.]]></string>
+    <string name="settings_auto_disable_usb_debugging">Desactivar depuración USB automáticamente</string>
+    <string name="settings_auto_disable_usb_debugging_summary">Desactivar la depuración por USB tras reiniciar si JWSK no está configurado para iniciar al arrancar</string>
+    <string name="settings_service_group">Mantenimiento del servicio</string>
+
+    <!-- Lab Features - Service Behavior -->
+    <string name="lab_service_behavior_title">Comportamiento del servicio</string>
+    <string name="lab_keep_alive_title">Mantener servicio activo</string>
+    <string name="lab_keep_alive_summary">Comprobar periódicamente la ejecución del servicio JWSK y reiniciarlo si es necesario</string>
+    <string name="lab_auto_restart_title">Reiniciar automáticamente tras fallo</string>
+    <string name="lab_auto_restart_summary">Intentar reiniciar automáticamente el servicio JWSK en caso de cierre inesperado</string>
+    <string name="lab_notify_death_title">Notificar si el servicio se detiene</string>
+    <string name="lab_notify_death_summary">Mostrar una notificación si el servicio JWSK se detiene inesperadamente</string>
+
+    <!-- Lab Features - Debugging -->
+    <string name="lab_debugging_title">Depuración</string>
+    <string name="lab_verbose_logging_title">Registro detallado</string>
+    <string name="lab_verbose_logging_summary">Escribir registros detallados en Logcat. Desactívelo en producción para ahorrar batería</string>
+    <string name="notification_channel_watchdog">Monitor del servicio</string>
+    <string name="notification_watchdog_title">Servicio JWSK detenido</string>
+    <string name="notification_watchdog_text">El servicio de JWSK se ha detenido inesperadamente.</string>
+    <string name="watchdog_service_title">Monitor JWSK activo</string>
+    <string name="watchdog_service_text">Monitoreando el servicio JWSK para recuperación activa</string>
+
+    <!-- JWSK Control Notification -->
+    <string name="notification_control_channel_name">Control de JWSK</string>
+    <string name="notification_control_title_running">JWSK está en ejecución</string>
+    <string name="notification_control_title_stopped">JWSK está detenido</string>
+    <string name="notification_control_text_running">Toque para abrir JWSK o despliegue para detenerlo.</string>
+    <string name="notification_control_text_stopped">Toque para abrir JWSK o despliegue para iniciarlo.</string>
+    <string name="notification_control_action_start">Iniciar</string>
+    <string name="notification_control_action_stop">Detener</string>
+
+    <!-- Update Settings -->
+    <string name="update_settings_title">Ajustes de actualización</string>
+    <string name="update_settings_catalog">Catálogo de módulos</string>
+    <string name="update_settings_catalog_enabled">Activar catálogo</string>
+    <string name="update_settings_catalog_enabled_summary">Mostrar módulos descubiertos mediante GitHub Topics</string>
+    <string name="update_settings_frequency">Frecuencia de actualización</string>
+    <string name="update_settings_frequency_label">Buscar actualizaciones</string>
+    <string name="update_settings_frequency_manual">Manual</string>
+    <string name="update_settings_frequency_daily">Diaria</string>
+    <string name="update_settings_frequency_weekly">Semanal</string>
+    <string name="update_settings_install_mode">Modo de instalación</string>
+    <string name="update_settings_install_mode_label">Método de instalación predeterminado</string>
+    <string name="update_settings_install_mode_sources">Compilar desde fuentes</string>
+    <string name="update_settings_install_mode_release">Descargar ZIP de release</string>
+    <string name="update_settings_github">GitHub</string>
+    <string name="update_settings_github_pat">Token de acceso personal</string>
+    <string name="update_settings_github_pat_set">Token configurado</string>
+    <string name="update_settings_github_pat_unset">Sin configurar (60 peticiones/hora)</string>
+    <string name="update_settings_github_pat_title">Token de acceso personal de GitHub</string>
+    <string name="update_settings_github_pat_description">Opcional. Un token de GitHub aumenta el límite de API de 60 a 5000 peticiones/hora. Solo requiere alcance public_repo.</string>
+    <string name="update_settings_github_pat_label">Token</string>
+    <string name="update_settings_github_pat_show">Mostrar</string>
+    <string name="update_settings_github_pat_hide">Ocultar</string>
+    <string name="update_settings_github_pat_clear">Limpiar</string>
+    <string name="update_settings_github_pat_delete">Eliminar token</string>
+    <string name="update_settings_github_pat_delete_summary">Eliminar el token de GitHub guardado</string>
+
+    <!-- Module Catalog -->
+    <string name="modules_catalog">Catálogo</string>
+    <string name="modules_catalog_title">Catálogo de módulos</string>
+    <string name="modules_catalog_empty">No se encontraron módulos</string>
+    <string name="modules_catalog_sort_newest">Más recientes</string>
+    <string name="modules_catalog_sort_oldest">Más antiguos</string>
+    <string name="modules_catalog_sort_stars">Estrellas</string>
+    <string name="modules_catalog_sort_official">Oficiales</string>
+    <string name="modules_catalog_install_sources">Instalar desde fuentes</string>
+    <string name="modules_catalog_install_release">Descargar ZIP de release</string>
+    <string name="modules_catalog_install_description">Seleccione cómo instalar este módulo:</string>
+    <string name="modules_catalog_install_success">Módulo instalado con éxito</string>
+    <string name="modules_catalog_install_failed">Error de instalación: %s</string>
+    <string name="modules_catalog_token_required">Token de GitHub requerido</string>
+    <string name="modules_catalog_token_hint">Token de acceso personal de GitHub</string>
+    <string name="modules_catalog_token_description">Se requiere un token para buscar módulos en GitHub. Puede crear uno en github.com/settings/tokens</string>
+    <string name="modules_catalog_token_format_warning">El token debe comenzar por ghp_ o github_pat_ y tener al menos 30 caracteres</string>
+    <string name="modules_catalog_loading">Cargando catálogo…</string>
+    <string name="modules_catalog_error">Error al cargar el catálogo</string>
+    <string name="modules_catalog_install">Instalar</string>
+    <string name="modules_catalog_installing">Instalando…</string>
+    <string name="modules_catalog_view_github">Ver en GitHub</string>
+    <string name="modules_catalog_skip_token">Omitir</string>
+    <string name="modules_catalog_open">Abrir catálogo</string>
+
+    <!-- TV Status -->
+    <string name="tv_status_active">ACTIVO</string>
+    <string name="tv_status_disabled">DESACTIVADO</string>
+    <string name="tv_status_trusted">CONFIABLE</string>
+
+    <!-- Wear Catalog -->
+    <string name="wear_catalog_sort_newest">Más recientes</string>
+    <string name="wear_catalog_sort_stars">Estrellas</string>
+    <string name="wear_catalog_sort_official">Oficiales</string>
+    <string name="wear_catalog_sort_by">Ordenar por</string>
+    <string name="wear_catalog_filter">Filtrar</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_restore_title">Copia de seguridad y restauración</string>
+    <string name="backup_title">Respaldar ajustes y módulos</string>
+    <string name="backup_summary">Exportar configuración y módulos a un archivo ZIP</string>
+    <string name="restore_title">Restaurar ajustes y módulos</string>
+    <string name="restore_summary">Importar configuración y módulos desde un archivo ZIP</string>
+
+    <!-- Comput Console -->
+    <string name="comput_title">Comput</string>
+    <string name="comput_settings">Ajustes de consola Comput</string>
+    <string name="comput_adb_console">Consola Comput ADB</string>
+    <string name="comput_recommand_title">ReCommand para Comput</string>
+    <string name="comput_recommand_summary">Mostrar diálogo de confirmación antes de ejecutar comandos en la consola Comput</string>
+    <string name="comput_recommand_confirmation">¿Está seguro de que desea ejecutar este comando ADB en Comput?</string>
+    <string name="comput_ai_api_key_empty">¡La clave de API de Google AI Studio está vacía! Configúrela en los Ajustes de JWSK (Ajustes de consola Comput).</string>
+    <string name="comput_ai_api_key_title">Clave de API de Google AI Studio</string>
+    <string name="comput_ai_api_key_not_configured">No configurada (Gemini IA no funcionará)</string>
+    <string name="comput_gemini_model_title">Modelo de IA Gemini</string>
+    <string name="comput_gemini_explain">Explicación Gemini</string>
+    <string name="comput_api_key_label">Clave de API</string>
+    <string name="comput_show_api_key">Mostrar clave</string>
+    <string name="comput_hide_api_key">Ocultar clave</string>
+    <string name="comput_gemini_model_performance">Alto rendimiento en programación y agentes (Recomendado)</string>
+    <string name="comput_gemini_model_lightweight">Modelo ligero de alta velocidad</string>
+    <string name="comput_gemini_api_error">La API de Gemini devolvió el código de error %1$d: %2$s</string>
+    <string name="comput_gemini_connection_error">Error de conexión.</string>
+    <string name="comput_gemini_failed">No se pudo acceder a la API de Gemini: %1$s</string>
+    <string name="comput_gemini_no_details">Sin detalles.</string>
+    <string name="comput_sh_mode">Modo sh</string>
+    <string name="comput_adb_mode">Modo adb</string>
+    <string name="comput_command_label">Comando</string>
+    <string name="comput_command_placeholder">ej. pm list packages</string>
+    <string name="comput_run">Ejecutar</string>
+    <string name="comput_clear">Limpiar</string>
+    <string name="comput_console_cleared">Consola limpiada.</string>
+    <string name="comput_console_output">Salida de consola</string>
+    <string name="comput_output_copied">Salida copiada al portapapeles</string>
+    <string name="comput_copy_output">Copiar salida</string>
+    <string name="comput_ask_gemini">Preguntar a Gemini</string>
+    <string name="comput_executing">Ejecutando: %1$s ...</string>
+    <string name="comput_adb_translate">Traducción de comando ADB activa\nOriginal: %1$s\nEjecutando...</string>
+    <string name="comput_command_no_output">El comando finalizó sin salida.</string>
+    <string name="comput_timed_out">[E] Tiempo de espera del comando agotado tras 120 segundos.</string>
+    <string name="comput_exit_code">[E] El comando finalizó con código %1$d.</string>
+    <string name="comput_running_macro">Ejecutando macro: %1$s</string>
+    <string name="comput_executing_cmd">> Ejecutando comando: %1$s</string>
+    <string name="comput_error_not_running">Error: El servicio privilegiado JWSK no está en ejecución. Inícielo primero.</string>
+    <string name="comput_error_no_binder">Error: No se pudo obtener el binder de JWSK.</string>
+    <string name="comput_console_initialized">Consola inicializada. Servicio privilegiado JWSK conectado.\nListo para comandos.</string>
+    <string name="comput_ai_explanation">Explicación de la IA</string>
+    <string name="comput_commandium">Commandium</string>
+    <string name="comput_commandium_assistant">Asistente IA Commandium</string>
+    <string name="comput_commandium_description">Genere comandos de consola usando lenguaje natural. Gemini generará un comando listo para copiar.</string>
+    <string name="comput_commandium_label">¿Qué comando necesita?</string>
+    <string name="comput_commandium_placeholder">ej. Buscar archivos mayores a 10MB en /sdcard</string>
+    <string name="comput_ask_commandium">Consultar a Commandium</string>
+    <string name="comput_generated_command">Comando generado:</string>
+    <string name="comput_command_pasted">Comando pegado en la entrada</string>
+    <string name="comput_use_command">Usar comando</string>
+    <string name="comput_copied_to_clipboard">Copiado al portapapeles</string>
+    <string name="comput_copy_command">Copiar comando</string>
+    <string name="comput_console_macros">Macros de consola</string>
+    <string name="comput_stop">Detener (%1$d)</string>
+    <string name="comput_record_macro">Grabar macro</string>
+    <string name="comput_recording_active">Grabación activa. Ejecute comandos desde la entrada principal para agregarlos a esta macro.</string>
+    <string name="comput_saved_macros">Macros guardadas</string>
+    <string name="comput_no_macros">Sin macros guardadas. Presione \'Grabar macro\' para comenzar.</string>
+    <string name="comput_delete">Eliminar</string>
+    <string name="comput_recommand_confirmation_title">Confirmación ReCommand</string>
+    <string name="comput_execute">Ejecutar</string>
+    <string name="comput_cancel">Cancelar</string>
+    <string name="comput_save_macro">Guardar macro</string>
+    <string name="comput_save_macro_hint">Introduzca un nombre para la macro grabada:</string>
+    <string name="comput_macro_name_label">Nombre de macro</string>
+    <string name="comput_save">Guardar</string>
+    <string name="diagnostics_app">Aplicación</string>
+    <string name="diagnostics_android">Android</string>
+    <string name="diagnostics_service">Servicio</string>
+    <string name="diagnostics_server_uid">UID de servidor</string>
+    <string name="diagnostics_server_api">API de servidor</string>
+    <string name="diagnostics_selinux">SELinux</string>
+    <string name="diagnostics_adb_permission">Permiso ADB</string>
+    <string name="diagnostics_authorized_apps">Apps autorizadas</string>
+    <string name="diagnostics_local_network">Red local</string>
+    <string name="diagnostics_running">en ejecución</string>
+    <string name="diagnostics_stopped">detenido</string>
+    <string name="diagnostics_granted">concedido</string>
+    <string name="diagnostics_missing">ausente</string>
+    <string name="diagnostics_not_required">no requerido</string>
+    <string name="diagnostics_full">completo</string>
+    <string name="diagnostics_limited">limitado</string>
+    <string name="diagnostics_unknown">desconocido</string>
+
+    <!-- ErrorProtect & TCP 5555 -->
+    <string name="error_protect_title">ErrorProtect</string>
+    <string name="error_protect_summary">Supervisa la salud del proceso y errores cada 10 segundos. Detiene y reinicia JWSK si detecta problemas.</string>
+    <string name="settings_tcp_5555_title">Vincular TCP 5555</string>
+    <string name="settings_tcp_5555_summary">Vincular el servidor ADB local al puerto 5555 para mantener la conexión sin depender de cambios de puerto.</string>
+    <string name="settings_tcp_5555_button">Vincular a 5555</string>
+    <string name="settings_tcp_5555_bind_success">Servidor ADB vinculado con éxito al puerto TCP 5555</string>
+    <string name="settings_tcp_5555_bind_failed">Fallo al vincular ADB al puerto 5555: %1$s</string>
+    <string name="settings_tcp_5555_bind_failed_generic">Se requiere Root, Dhizuku o un servicio JWSK activo.</string>
+</resources>
