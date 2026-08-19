@@ -48,10 +48,8 @@ jobs:
       - name: Generate fallback signing key
         if: hashFiles('signing.properties') == ''
         run: |
-          debug_key_dir="${ANDROID_USER_HOME:-$HOME/.android}"
-          mkdir -p "$debug_key_dir"
           keytool -genkeypair -noprompt \
-            -keystore "$debug_key_dir/debug.keystore" \
+            -keystore ci-debug.keystore \
             -storepass android \
             -alias androiddebugkey \
             -keypass android \
@@ -59,6 +57,12 @@ jobs:
             -keysize 2048 \
             -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
+          {
+            printf 'KEYSTORE_PASSWORD=android\n'
+            printf 'KEYSTORE_ALIAS=androiddebugkey\n'
+            printf 'KEYSTORE_ALIAS_PASSWORD=android\n'
+            printf 'KEYSTORE_FILE=../ci-debug.keystore\n'
+          } > signing.properties
       - name: Setup Android SDK
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
