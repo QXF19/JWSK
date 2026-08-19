@@ -3,9 +3,9 @@ package moe.shizuku.manager.patch
 import android.content.Context
 import android.net.Uri
 import android.system.Os
+import moe.shizuku.manager.root.JwskNativeCore
 import java.io.File
 import java.io.FileInputStream
-import java.security.MessageDigest
 
 enum class PatchMode(val title: String, val detail: String) {
     MAGISK("Magisk 30.7", "修补 boot / init_boot ramdisk，保留加密与 dm-verity"),
@@ -48,18 +48,7 @@ object BootImageInspector {
         return SelectedImage(output, name, output.length(), sha256(output), format)
     }
 
-    fun sha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().buffered().use { input ->
-            val buffer = ByteArray(1024 * 128)
-            while (true) {
-                val count = input.read(buffer)
-                if (count < 0) break
-                digest.update(buffer, 0, count)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
-    }
+    fun sha256(file: File): String = JwskNativeCore.sha256(file)
 
     private fun queryName(context: Context, uri: Uri): String? {
         context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)

@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.shizuku.manager.app.AppActivity
 import moe.shizuku.manager.ui.compose.ShizukuExpressiveTheme
+import moe.shizuku.manager.root.RootLogStore
 import java.io.File
 
 class PatchHubActivity : AppActivity() {
@@ -133,6 +134,7 @@ class PatchHubActivity : AppActivity() {
         val input = inputImage ?: return
         busy = true
         status = "正在使用 ${mode.title} 修补；不会写入设备分区……"
+        RootLogStore.append(this, "PATCH", "start mode=${mode.name}, inputSha256=${input.sha256}")
         lifecycleScope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
@@ -141,9 +143,11 @@ class PatchHubActivity : AppActivity() {
             }.onSuccess { result ->
                 pendingOutput = result.output
                 status = "修补完成\n输出：${result.output.name}\nSHA-256：${result.sha256}\n\n${result.log.takeLast(6000)}"
+                RootLogStore.append(this@PatchHubActivity, "PATCH", "success mode=${mode.name}, outputSha256=${result.sha256}")
                 outputPicker.launch(result.output.name)
             }.onFailure {
                 status = "修补失败：${it.message}"
+                RootLogStore.append(this@PatchHubActivity, "PATCH", "failed mode=${mode.name}, error=${it.message}")
             }
             busy = false
         }

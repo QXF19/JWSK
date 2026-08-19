@@ -239,6 +239,16 @@
             android:name=".connector.ShizukuConnectorProvider"
             android:authorities="${applicationId}.connector;moe.shizuku.privileged.api.connector"
             android:exported="true" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/jwsk_file_paths" />
+        </provider>
     </application>
 
 </manifest>

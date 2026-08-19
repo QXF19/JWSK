@@ -52,6 +52,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -83,6 +84,13 @@ import moe.shizuku.manager.app.AppActivity
 import moe.shizuku.manager.management.ApplicationManagementActivity
 import moe.shizuku.manager.module.AdbModuleManager
 import moe.shizuku.manager.patch.PatchHubActivity
+import moe.shizuku.manager.root.RootBackend
+import moe.shizuku.manager.root.RootDashboardCard
+import moe.shizuku.manager.root.RootEnvironment
+import moe.shizuku.manager.root.RootManager
+import moe.shizuku.manager.root.RootModulesScreen
+import moe.shizuku.manager.root.RootLogsScreen
+import moe.shizuku.manager.root.RootPolicyScreen
 
 import moe.shizuku.manager.management.appsViewModel
 import moe.shizuku.manager.model.ServiceStatus
@@ -176,6 +184,15 @@ abstract class HomeActivity : AppActivity() {
             val localNetworkPermissionState = remember(permissionRefreshTick.intValue) {
                 buildLocalNetworkPermissionState()
             }
+            var rootEnvironment by remember { mutableStateOf(RootEnvironment()) }
+
+            LaunchedEffect(serviceResource?.status, serviceResource?.data?.uid, permissionRefreshTick.intValue) {
+                val status = serviceResource?.data
+                rootEnvironment = RootManager.detect(
+                    applicationContext,
+                    adbActive = status?.isRunning == true && status.uid != 0
+                )
+            }
 
             LaunchedEffect(serviceResource?.status, serviceResource?.data?.uid) {
                 val status = serviceResource?.data ?: return@LaunchedEffect
@@ -228,8 +245,8 @@ abstract class HomeActivity : AppActivity() {
                             NavigationBarItem(
                                 selected = selectedTab == 3,
                                 onClick = { selectedTab = 3 },
-                                icon = { ShizukuIcon(R.drawable.ic_action_settings_24dp, contentDescription = null) },
-                                label = { Text(stringResource(R.string.settings_title)) }
+                                icon = { ShizukuIcon(R.drawable.ic_outline_info_24, contentDescription = null) },
+                                label = { Text("日志") }
                             )
                         }
                     }
@@ -249,6 +266,7 @@ abstract class HomeActivity : AppActivity() {
                                     localNetworkPermissionState = localNetworkPermissionState,
                                     isPrimaryUser = UserHandleCompat.myUserId() == 0,
                                     isRooted = EnvironmentUtils.isRooted(),
+                                    rootEnvironment = rootEnvironment,
                                     onRefresh = {
                                         checkServerStatus()
                                         appsModel.load()
@@ -272,16 +290,27 @@ abstract class HomeActivity : AppActivity() {
                                     },
                                     onStartDhizuku = { startDhizukuMode() },
                                     dhizukuEnabled = ModuleSettings.isDhizukuEnabled(),
-                                    onStartTcp5555 = { runWithLocalNetworkAccess(::bindTcp5555) }
+                                    onStartTcp5555 = { runWithLocalNetworkAccess(::bindTcp5555) },
+                                    onOpenModules = { selectedTab = 1 },
+                                    onOpenComput = { selectedTab = 2 },
+                                    onOpenLogs = { selectedTab = 3 },
+                                    onOpenSettings = { selectedTab = 4 },
+                                    onOpenRootApps = { selectedTab = 5 }
                                 )
-                                1 -> moe.shizuku.manager.module.ModulesScreen(onOpenWebUi = {
-                                    startActivity(
-                                        Intent(this@HomeActivity, moe.shizuku.manager.module.ModuleWebViewActivity::class.java)
-                                            .putExtra(moe.shizuku.manager.module.ModuleWebViewActivity.EXTRA_MODULE_ID, it)
-                                    )
-                                })
+                                1 -> if (rootEnvironment.backend in setOf(RootBackend.MAGISK, RootBackend.KERNEL_SU, RootBackend.HYBRID)) {
+                                    RootModulesScreen(rootEnvironment)
+                                } else {
+                                    moe.shizuku.manager.module.ModulesScreen(onOpenWebUi = {
+                                        startActivity(
+                                            Intent(this@HomeActivity, moe.shizuku.manager.module.ModuleWebViewActivity::class.java)
+                                                .putExtra(moe.shizuku.manager.module.ModuleWebViewActivity.EXTRA_MODULE_ID, it)
+                                        )
+                                    })
+                                }
                                 2 -> moe.shizuku.manager.logs.ComputScreen()
-                                3 -> moe.shizuku.manager.settings.SettingsScreen()
+                                3 -> RootLogsScreen(rootEnvironment)
+                                4 -> moe.shizuku.manager.settings.SettingsScreen()
+                                5 -> RootPolicyScreen(rootEnvironment, onBack = { selectedTab = 0 })
                             }
                         }
                     }
@@ -672,6 +701,7 @@ private fun HomeScreen(
     localNetworkPermissionState: LocalNetworkPermissionState,
     isPrimaryUser: Boolean,
     isRooted: Boolean,
+    rootEnvironment: RootEnvironment,
     onRefresh: () -> Unit,
     onAbout: () -> Unit,
     onStop: () -> Unit,
@@ -690,7 +720,12 @@ private fun HomeScreen(
     onRequestLocalNetworkPermission: () -> Unit,
     onStartDhizuku: () -> Unit,
     dhizukuEnabled: Boolean,
-    onStartTcp5555: () -> Unit
+    onStartTcp5555: () -> Unit,
+    onOpenModules: () -> Unit,
+    onOpenComput: () -> Unit,
+    onOpenLogs: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenRootApps: () -> Unit
 ) {
     val context = LocalContext.current
     val status = serviceResource?.data ?: ServiceStatus()
@@ -769,46 +804,25 @@ private fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
+                RootDashboardCard(
+                    environment = rootEnvironment,
+                    onModules = onOpenModules,
+                    onPatch = onPatchHub,
+                    onComput = onOpenComput,
+                    onLogs = onOpenLogs,
+                    onRootApps = if (rootEnvironment.backend == RootBackend.ADB) onManageApps else onOpenRootApps,
+                    onSettings = onOpenSettings
+                )
+            }
+
+            item {
                 StatusCard(
                     serviceResource = serviceResource,
                     status = status
                 )
             }
 
-            item {
-                SimpleActionCard(
-                    icon = R.drawable.ic_root_24dp,
-                    title = stringResource(R.string.patch_hub_title),
-                    body = stringResource(R.string.patch_hub_summary),
-                    onClick = onPatchHub
-                )
-            }
 
-
-
-            if (adbPermission) {
-                item {
-                    ManageAppsCard(
-                        status = status,
-                        grantedCount = grantedCount,
-                        onClick = onManageApps
-                    )
-                }
-
-                item {
-                    SimpleActionCard(
-                        icon = R.drawable.ic_terminal_24,
-                        title = stringResource(R.string.home_terminal_title),
-                        body = if (running) {
-                            stringResource(R.string.home_terminal_description)
-                        } else {
-                            stringResource(R.string.home_status_service_not_running, stringResource(R.string.app_name))
-                        },
-                        enabled = running,
-                        onClick = onTerminal
-                    )
-                }
-            }
 
             if (running && !adbPermission) {
                 item {
@@ -832,40 +846,20 @@ private fun HomeScreen(
             }
 
             if (isPrimaryUser) {
-                val rootRestart = running && status.uid == 0
-                if (isRooted) {
-                    item {
-                        RootCard(rootRestart, onStartRoot)
-                    }
-                }
-                if (canUseWirelessAdb) {
-                    item {
-                        WirelessAdbCard(
-                            localNetworkPermissionState = localNetworkPermissionState,
-                            onStartWirelessAdb = onStartWirelessAdb,
-                            onPairWirelessAdb = onPairWirelessAdb,
-                            onOpenWirelessGuide = onOpenWirelessGuide
-                        )
-                    }
-                }
                 item {
-                    AdbCommandCard(
+                    AdbCompactCard(
+                        running = running,
+                        rooted = isRooted,
+                        canUseWirelessAdb = canUseWirelessAdb,
+                        onStartRoot = onStartRoot,
+                        onStartWirelessAdb = onStartWirelessAdb,
+                        onPairWirelessAdb = onPairWirelessAdb,
                         onShowAdbCommand = onShowAdbCommand,
-                        onOpenAdbHelp = onOpenAdbHelp
+                        onTerminal = onTerminal,
+                        onStartTcp5555 = onStartTcp5555,
+                        onOpenAdbHelp = onOpenAdbHelp,
+                        onOpenWirelessGuide = onOpenWirelessGuide
                     )
-                }
-                if (!isRooted) {
-                    item {
-                        RootCard(rootRestart, onStartRoot)
-                    }
-                }
-                if (dhizukuEnabled) {
-                    item {
-                        DhizukuCard(onStartDhizuku)
-                    }
-                }
-                item {
-                    TcpModeCard(onStartTcp5555)
                 }
             }
 
@@ -893,6 +887,40 @@ private fun HomeScreen(
                     onClick = onLearnMore
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun AdbCompactCard(
+    running: Boolean,
+    rooted: Boolean,
+    canUseWirelessAdb: Boolean,
+    onStartRoot: () -> Unit,
+    onStartWirelessAdb: () -> Unit,
+    onPairWirelessAdb: () -> Unit,
+    onShowAdbCommand: () -> Unit,
+    onTerminal: () -> Unit,
+    onStartTcp5555: () -> Unit,
+    onOpenAdbHelp: () -> Unit,
+    onOpenWirelessGuide: () -> Unit
+) {
+    HomeCard(
+        icon = R.drawable.ic_adb_24dp,
+        title = "ADB 管理",
+        body = "保留无线配对、启动命令、终端与 TCP 5555 等主要功能；高级选项已收拢，减少误操作。"
+    ) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (rooted) FilledTonalButton(onClick = onStartRoot) { Text(if (running) "Root 重启服务" else "Root 启动") }
+            if (canUseWirelessAdb) {
+                FilledTonalButton(onClick = onStartWirelessAdb) { Text("无线启动") }
+                OutlinedButton(onClick = onPairWirelessAdb) { Text("配对") }
+            }
+            OutlinedButton(onClick = onShowAdbCommand) { Text("ADB 命令") }
+            OutlinedButton(onClick = onTerminal, enabled = running) { Text("终端") }
+            OutlinedButton(onClick = onStartTcp5555) { Text("TCP 5555") }
+            OutlinedButton(onClick = onOpenAdbHelp) { Text("帮助") }
+            if (canUseWirelessAdb) TextButton(onClick = onOpenWirelessGuide) { Text("无线指南") }
         }
     }
 }
