@@ -17,3 +17,4 @@
 jdk21/
 release.keystore
 signing.properties
+native/**/target/
