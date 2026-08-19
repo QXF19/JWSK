@@ -25,11 +25,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew :manager:assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shevery
-          path: app/build/outputs/apk/debug/app-debug.apk
-          
+          name: JWSK-debug
+          path: out/apk/JWSK-v*-debug.apk
+          if-no-files-found: error

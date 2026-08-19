@@ -40,6 +40,9 @@ JWSK（江望sk）以独立应用 ID `cn.jiangwang.jwsk` 发布。v1.1 主界面
 
 ## Root 管理模式
 
+完整的启动探测、执行器选择与日志写入时序见
+[Root detection and journaling flow](docs/root-detection-and-journaling.md)。
+
 | 当前环境 | JWSK 使用的管理能力 | 限制 |
 | --- | --- | --- |
 | Magisk / Kitsune | Magisk 模块、Magisk 授权策略、Boot 修补、Comput、日志 | 新的 su 请求仍由 Magisk 守护进程确认 |
