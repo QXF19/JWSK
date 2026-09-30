@@ -1,28 +1,21 @@
 package moe.shizuku.manager.root
 
 import java.io.File
-import java.security.MessageDigest
 
 object JwskNativeCore {
     private val loaded = runCatching {
         System.loadLibrary("jwsk_core")
+        check(nativeApiVersion() == 120)
+        listOf(0L, 1L, -1L, Long.MIN_VALUE).forEach { check(nativeMix64(it) == mix64(it)) }
         true
     }.getOrDefault(false)
 
     private external fun nativeMix64(input: Long): Long
+    private external fun nativeApiVersion(): Int
 
-    fun sha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().buffered().use { input ->
-            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-            while (true) {
-                val count = input.read(buffer)
-                if (count < 0) break
-                digest.update(buffer, 0, count)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
-    }
+    val backendLabel: String get() = if (loaded) "Rust JNI 1.2.0" else "Kotlin 回退"
+
+    fun sha256(file: File): String = FileDigest.sha256(file)
 
     fun moduleProperty(content: String, key: String): String? {
         return content.lineSequence()

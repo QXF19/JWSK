@@ -9,7 +9,7 @@ commands.
 sequenceDiagram
     autonumber
     actor User as 用户
-    participant UI as HomeActivity / UI
+    participant UI as MainActivity / Root UI
     participant RM as RootManager
     participant Shell as libsu Shell
     participant Magisk as Magisk daemon
@@ -18,12 +18,12 @@ sequenceDiagram
     participant Rust as Rust JNI core
 
     User->>UI: 打开 JWSK 或刷新状态
-    UI->>RM: detect(adbActive)
+    UI->>RM: detect(context)
     RM->>Shell: id -u + 框架探测
     Shell->>Magisk: magisk -v（若存在）
     Magisk-->>Shell: 版本 / 不存在
     Shell->>KSU: debug version（若可执行）
-    KSU-->>Shell: 版本 / 不存在
+    KSU-->>Shell: Kernel Version: N（仅 N 大于 0 表示活动内核）
     Shell-->>RM: UID、Magisk、KernelSU、KSU 模式
 
     alt Magisk 与 KernelSU 同时存在
@@ -33,13 +33,11 @@ sequenceDiagram
         RM->>RM: backend = KERNEL_SU
     else Magisk 可用
         RM->>RM: backend = MAGISK
-    else ADB 服务已激活
-        RM->>RM: backend = ADB
     else 无可用执行器
         RM->>RM: backend = NONE
     end
 
-    RM->>Log: append(DETECT, backend + root + adb)
+    RM->>Log: append(DETECT, backend + root)
     Log->>Rust: nativeMix64(日志元数据折叠值)
     alt 当前 ABI 含 Rust 库
         Rust-->>Log: 64 位完整性标记
@@ -58,9 +56,6 @@ sequenceDiagram
     else backend = KERNEL_SU
         RM->>KSU: ksud module 生命周期命令
         KSU-->>RM: 退出码和有限输出
-    else backend = ADB
-        UI->>Shell: 精简 ADB / Shizuku 工作流
-        Shell-->>UI: 执行结果
     else backend = HYBRID / NONE
         RM-->>UI: 拒绝危险自动操作并说明原因
     end
@@ -74,3 +69,13 @@ sequenceDiagram
 The Rust boundary accepts a primitive `Long` only. Java-owned strings and byte
 buffers remain in the Kotlin/Java layer, and a behavior-compatible Kotlin
 fallback keeps unsupported ABIs functional.
+
+The bundled ksud binary is also available on Magisk devices. Its mere presence,
+a zero kernel version, or leftover `/data/adb/ksu` files never enables KernelSU
+mode. A refresh recreates a previously denied libsu session. Privileged
+operations check the shell's actual Root status before execution.
+
+Rust API version and deterministic vectors are checked when loading JNI.
+The SplitMix64 journal stamp is a diagnostic checksum, not a cryptographic
+signature or proof against deliberate tampering. File SHA-256 is calculated
+with Java's streaming MessageDigest implementation.

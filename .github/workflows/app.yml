@@ -35,6 +35,10 @@ jobs:
           KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEYSTORE_ALIAS" ] || [ -z "$KEYSTORE_ALIAS_PASSWORD" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              echo "Release signing secrets are required for a tag build."
+              exit 1
+            fi
             echo "Signing secrets are not configured; using debug signing fallback."
             exit 0
           fi
@@ -74,6 +78,12 @@ jobs:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
+      - name: Build and test Rust JNI core
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager 'ndk;29.0.14206865'
+          rustup toolchain install stable --profile minimal --component rustfmt
+          rustup default stable
+          bash scripts/build-rust-android.sh
       - name: Build with Gradle
         id: buildWithGradle
         run: |
@@ -81,7 +91,7 @@ jobs:
           echo 'android.native.buildOutput=verbose' >> gradle.properties
           echo 'org.gradle.caching=true' >> gradle.properties
           echo 'org.gradle.parallel=true' >> gradle.properties
-          ./gradlew :manager:assembleRelease
+          ./gradlew :manager:testDebugUnitTest :manager:assembleRelease
           release_path=$(find out/apk -maxdepth 1 -name 'JWSK-v*-release.apk' -print -quit)
           test -n "$release_path"
           release_name=$(basename "$release_path" .apk)
@@ -100,4 +110,5 @@ jobs:
         with:
           files: out/apk/*.apk
           fail_on_unmatched_files: true
+          body_path: docs/release-notes-${{ github.ref_name }}.md
           generate_release_notes: true

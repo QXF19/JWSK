@@ -10,8 +10,8 @@ if (ksFile.canRead()) {
         android.signingConfigs.sign.keyPassword props['KEYSTORE_ALIAS_PASSWORD']
     }
 } else {
-    android.signingConfigs.sign.storeFile = android.signingConfigs.debug.storeFile
-    android.signingConfigs.sign.storePassword = android.signingConfigs.debug.storePassword
-    android.signingConfigs.sign.keyAlias = android.signingConfigs.debug.keyAlias
-    android.signingConfigs.sign.keyPassword = android.signingConfigs.debug.keyPassword
+    // Use the built-in configuration itself so AGP creates its debug keystore
+    // on a clean machine. Copying its values into "sign" skips that creation.
+    android.buildTypes.debug.signingConfig = android.signingConfigs.debug
+    android.buildTypes.release.signingConfig = android.signingConfigs.debug
 }

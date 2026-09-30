@@ -60,8 +60,7 @@ fun RootDashboardCard(
                             RootBackend.MAGISK -> "Boot 镜像 Root 管理模式"
                             RootBackend.KERNEL_SU -> "内核级 Root 管理模式"
                             RootBackend.HYBRID -> "检测到双 Root 框架"
-                            RootBackend.ADB -> "精简 ADB 管理模式"
-                            RootBackend.NONE -> "选择内核修补、Boot 修补或 ADB 激活"
+                            RootBackend.NONE -> "安装 Magisk 或 KernelSU 后授予 JWSK Root 权限"
                         },
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -82,12 +81,12 @@ fun RootDashboardCard(
                     ShizukuIcon(R.drawable.ic_system_icon, modifier = Modifier.size(18.dp))
                     Text(if (environment.backend == RootBackend.KERNEL_SU) " 内核模块" else " Kitsune 模块")
                 }
-                OutlinedButton(onClick = onRootApps, enabled = environment.rootGranted || environment.adbActive) {
+                OutlinedButton(onClick = onRootApps, enabled = environment.rootGranted) {
                     Text("应用授权")
                 }
                 OutlinedButton(onClick = onComput) { Text("Comput") }
                 OutlinedButton(onClick = onLogs) { Text("日志") }
-                OutlinedButton(onClick = onSettings) { Text("设置") }
+                OutlinedButton(onClick = onSettings) { Text("关于") }
             }
         }
     }

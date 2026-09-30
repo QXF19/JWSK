@@ -6,7 +6,6 @@
 
 package moe.shizuku.manager.ui.compose
 
-import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -75,8 +74,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -94,7 +91,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import moe.shizuku.manager.R
-import moe.shizuku.manager.app.ThemeHelper
 
 data class ExpressiveButtonSpec(
     @param:StringRes val label: Int,
@@ -105,41 +101,40 @@ data class ExpressiveButtonSpec(
 )
 
 @Composable
-fun ShizukuExpressiveTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
+fun JwskRootTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
-    val baseScheme = when {
-        ThemeHelper.isUsingSystemColor() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dark ->
-            dynamicDarkColorScheme(context)
-        ThemeHelper.isUsingSystemColor() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            dynamicLightColorScheme(context)
-        dark -> darkColorScheme(
-            primary = Color(0xFFB1B8DF),
-            secondary = Color(0xFFB9C7E8),
-            tertiary = Color(0xFFE2B8C8)
-        )
-        else -> lightColorScheme(
-            primary = Color(0xFF3F51B5),
-            secondary = Color(0xFF52669B),
-            tertiary = Color(0xFF8C4A62)
-        )
-    }
-    val colorScheme = if (dark && ThemeHelper.isBlackNightTheme(context)) {
-        baseScheme.copy(
-            background = Color.Black,
-            surface = Color.Black,
-            surfaceContainer = Color(0xFF0B0B0B)
+    val baseScheme = if (dark) {
+        darkColorScheme(
+            primary = Color(0xFF70D7C7),
+            onPrimary = Color(0xFF003730),
+            primaryContainer = Color(0xFF005047),
+            secondary = Color(0xFFAFC6FF),
+            secondaryContainer = Color(0xFF294575),
+            tertiary = Color(0xFFFFB59F),
+            background = Color(0xFF101412),
+            surface = Color(0xFF101412)
         )
     } else {
-        baseScheme
+        lightColorScheme(
+            primary = Color(0xFF006B5F),
+            onPrimary = Color.White,
+            primaryContainer = Color(0xFF8EF4E2),
+            secondary = Color(0xFF3E5F91),
+            secondaryContainer = Color(0xFFD7E3FF),
+            tertiary = Color(0xFF8A4F3D),
+            background = Color(0xFFF7FBF8),
+            surface = Color(0xFFF7FBF8)
+        )
     }
-
     MaterialExpressiveTheme(
-        colorScheme = colorScheme,
+        colorScheme = baseScheme,
         motionScheme = MotionScheme.expressive(),
         content = content
     )
 }
+
+@Composable
+fun ShizukuExpressiveTheme(content: @Composable () -> Unit) = JwskRootTheme(content)
 
 @Composable
 fun ShizukuScaffold(
