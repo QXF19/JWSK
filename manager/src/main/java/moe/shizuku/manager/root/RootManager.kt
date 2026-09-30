@@ -4,60 +4,50 @@ import android.content.Context
 import android.net.Uri
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 object RootManager {
     private val moduleId = Regex("^[A-Za-z][A-Za-z0-9._-]{0,63}$")
+    private val detectionLock = Mutex()
 
-    suspend fun detect(context: Context, adbActive: Boolean): RootEnvironment = withContext(Dispatchers.IO) {
+    suspend fun detect(context: Context): RootEnvironment = withContext(Dispatchers.IO) {
+      detectionLock.withLock {
+       try {
+        // A denied su request can leave libsu's cached shell unprivileged.
+        // Recreate it on refresh so a later user approval takes effect.
+        Shell.getCachedShell()?.takeIf { !it.isRoot }?.close()
         val bundledKsud = quote(File(context.applicationInfo.nativeLibraryDir, "libksud.so").absolutePath)
         val probe = run("""
             echo JWSK_UID=$(id -u 2>/dev/null)
-            if command -v magisk >/dev/null 2>&1; then echo JWSK_MAGISK=$(magisk -v 2>/dev/null | head -n 1); fi
-            if command -v ksud >/dev/null 2>&1; then
+            if command -v magisk >/dev/null 2>&1; then echo JWSK_MAGISK=$(magisk -v 2>/dev/null | head -n 1)
+            elif [ -x /data/adb/magisk/magisk ]; then echo JWSK_MAGISK=$(/data/adb/magisk/magisk -v 2>/dev/null | head -n 1); fi
+            if [ -x /data/adb/ksud ]; then
+              echo JWSK_KSU=$(/data/adb/ksud debug version 2>/dev/null | head -n 1)
+            elif command -v ksud >/dev/null 2>&1; then
               echo JWSK_KSU=$(ksud debug version 2>/dev/null | head -n 1)
             elif [ -x $bundledKsud ]; then
               echo JWSK_KSU=$($bundledKsud debug version 2>/dev/null | head -n 1)
             fi
-            if [ -d /data/adb/ksu ]; then echo JWSK_KSU_PRESENT=1; fi
             if [ -f /sys/module/kernelsu/parameters/version ]; then echo JWSK_KSU_KERNEL=$(cat /sys/module/kernelsu/parameters/version 2>/dev/null); fi
             if [ -d /data/adb/ksu ]; then
               if [ -f /data/adb/ksu/.lkm ]; then echo JWSK_KSU_MODE=LKM; else echo JWSK_KSU_MODE=GKI; fi
             fi
         """.trimIndent(), category = "DETECT", logOutput = false)
         val lines = probe.stdout + probe.stderr
-        val uid = value(lines, "JWSK_UID")
-        val magisk = value(lines, "JWSK_MAGISK")?.takeIf { it.isNotBlank() }
-        val ksu = value(lines, "JWSK_KSU")?.takeIf { it.isNotBlank() }
-        val ksuPresent = value(lines, "JWSK_KSU_PRESENT") == "1" || value(lines, "JWSK_KSU_KERNEL") != null
-        val root = uid == "0"
-        val hasMagisk = root && magisk != null
-        val hasKsu = root && (ksu != null || ksuPresent)
-        val backend = when {
-            hasMagisk && hasKsu -> RootBackend.HYBRID
-            hasKsu -> RootBackend.KERNEL_SU
-            hasMagisk -> RootBackend.MAGISK
-            adbActive -> RootBackend.ADB
-            else -> RootBackend.NONE
+        RootProbeParser.parse(lines).also {
+            RootLogStore.append(context, "DETECT", "backend=${it.backend}, root=${it.rootGranted}")
         }
-        val warning = when (backend) {
-            RootBackend.HYBRID -> "检测到两个 Root 框架。为防止模块与授权数据库冲突，JWSK 不会自动修改它们。"
-            RootBackend.KERNEL_SU -> "KernelSU 的应用授权界面仅对内核认可的管理器开放；JWSK 可稳定管理补丁、模块、日志与命令。"
-            else -> null
-        }
-        RootEnvironment(
-            backend = backend,
-            rootGranted = root,
-            adbActive = adbActive,
-            magiskVersion = magisk,
-            kernelSuVersion = ksu ?: value(lines, "JWSK_KSU_KERNEL"),
-            kernelMode = value(lines, "JWSK_KSU_MODE"),
-            warning = warning
-        ).also {
-            RootLogStore.append(context, "DETECT", "backend=${it.backend}, root=${it.rootGranted}, adb=${it.adbActive}")
-        }
+       } catch (error: CancellationException) {
+           throw error
+       } catch (error: Exception) {
+           RootEnvironment(statusDetail = "Root 检测失败，请检查授权后重试", warning = error.message?.take(160))
+       }
+      }
     }
 
     suspend fun listModules(context: Context, environment: RootEnvironment): List<RootModule> = withContext(Dispatchers.IO) {
@@ -76,7 +66,7 @@ object RootManager {
         """.trimIndent(), "MODULE_LIST", logOutput = false)
         if (result.code != 0) {
             RootLogStore.append(context, "MODULE_LIST", "failed code=${result.code}")
-            return@withContext emptyList()
+            error("无法读取模块（退出码 ${result.code}）：${result.output}")
         }
         parseModules(result.stdout, environment.backend)
     }
@@ -107,11 +97,11 @@ object RootManager {
             "POLICY_LIST",
             logOutput = false
         )
-        if (result.code != 0) return@withContext emptyList()
+        check(result.code == 0) { "无法读取 Magisk 授权（退出码 ${result.code}）：${result.output}" }
         result.stdout.mapNotNull { line ->
             val values = line.split('|')
                 .mapNotNull { field -> field.split('=', limit = 2).takeIf { it.size == 2 } }
-                .associate { it[0] to it[1] }
+                .associate { it[0].trim() to it[1].trim() }
             val uid = values["uid"]?.toIntOrNull() ?: return@mapNotNull null
             val packageName = context.packageManager.getPackagesForUid(uid)?.firstOrNull().orEmpty()
             val appName = runCatching {
@@ -184,9 +174,29 @@ object RootManager {
         }
     }
 
+    suspend fun runComput(context: Context, command: String): RootCommandResult {
+        val normalized = command.trim()
+        require(normalized.isNotEmpty()) { "命令不能为空" }
+        require(normalized.length <= 8192) { "命令过长" }
+        require('\u0000' !in normalized) { "命令包含无效字符" }
+        // A child shell prevents 'cd', 'exit' or environment changes from
+        // poisoning the shared manager shell. Android toybox bounds runtime.
+        val result = run("/system/bin/toybox timeout 120 /system/bin/sh -c ${quote(normalized)}", "COMPUT")
+        RootLogStore.append(
+            context,
+            "COMPUT",
+            "chars=${normalized.length}, code=${result.code}, elapsed=${result.elapsedMs}ms"
+        )
+        return result
+    }
+
     suspend fun run(command: String, category: String, logOutput: Boolean = true): RootCommandResult = withContext(Dispatchers.IO) {
         val started = System.nanoTime()
-        val result = Shell.cmd(command).exec()
+        val shell = Shell.getShell()
+        check(category == "DETECT" || shell.isRoot) { "未获得 Root 权限，请重新授权并检测" }
+        val stdout = BoundedOutput()
+        val stderr = BoundedOutput()
+        val result = shell.newJob().add("export PATH=/data/adb/magisk:${'$'}PATH", command).to(stdout, stderr).exec()
         RootCommandResult(
             code = result.code,
             stdout = result.out.take(2000),
@@ -238,10 +248,18 @@ object RootManager {
     }
 
     private fun validate(id: String) = require(moduleId.matches(id)) { "模块 ID 不安全" }
-    private fun ksud(context: Context) = quote(File(context.applicationInfo.nativeLibraryDir, "libksud.so").absolutePath)
+    private fun ksud(context: Context): String {
+        val bundled = quote(File(context.applicationInfo.nativeLibraryDir, "libksud.so").absolutePath)
+        return "jwsk_ksud() { if [ -x /data/adb/ksud ]; then /data/adb/ksud \"${'$'}@\"; else $bundled \"${'$'}@\"; fi; }; jwsk_ksud"
+    }
     private fun quote(value: String) = "'${value.replace("'", "'\\''")}'"
-    private fun value(lines: List<String>, key: String): String? = lines
-        .firstOrNull { it.startsWith("$key=") }
-        ?.substringAfter('=')
-        ?.trim()
+    private class BoundedOutput : ArrayList<String>() {
+        private var remaining = 64 * 1024
+        override fun add(element: String): Boolean {
+            if (remaining <= 0 || size >= 2000) return true
+            val line = element.take(remaining)
+            remaining -= line.length + 1
+            return super.add(line)
+        }
+    }
 }

@@ -61,7 +61,9 @@ fun RootModulesScreen(environment: RootEnvironment) {
     fun reload() {
         scope.launch {
             loading = true
-            modules = RootManager.listModules(context, environment)
+            runCatching { RootManager.listModules(context, environment) }
+                .onSuccess { modules = it }
+                .onFailure { modules = emptyList(); output = "读取模块失败" to (it.message ?: "请重新检测 Root") }
             loading = false
         }
     }
@@ -155,7 +157,10 @@ fun RootModulesScreen(environment: RootEnvironment) {
                     Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text("没有已安装模块", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text("请选择兼容 Magisk/KernelSU 的 ZIP。安装前请确认来源和设备兼容性。")
-                        Button(onClick = { installLauncher.launch(ROOT_MODULE_MIME_TYPES) }) { Text("选择模块 ZIP") }
+                        Button(
+                            enabled = environment.canManageRootModules,
+                            onClick = { installLauncher.launch(ROOT_MODULE_MIME_TYPES) }
+                        ) { Text("选择模块 ZIP") }
                     }
                 }
             }

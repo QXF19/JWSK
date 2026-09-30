@@ -58,6 +58,7 @@ fun RootLogsScreen(environment: RootEnvironment) {
                         AssistChip(onClick = {}, label = { Text(environment.title) })
                     }
                     Text("仅保存 JWSK 自身的检测、补丁与模块操作摘要。日志达到 1 MB 后自动轮转，敏感字段会被隐藏。")
+                    Text("日志标记引擎：${JwskNativeCore.backendLabel}", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

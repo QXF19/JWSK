@@ -18,3 +18,6 @@ jdk21/
 release.keystore
 signing.properties
 native/**/target/
+.tmp-jdk21/
+.tmp-jdk21.zip
+*.jks

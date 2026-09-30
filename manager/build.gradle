@@ -14,21 +14,29 @@ android {
         applicationId "cn.jiangwang.jwsk"
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
-        externalNativeBuild {
-            cmake {
-                arguments '-DANDROID_STL=none'
-            }
-        }
     }
     buildFeatures {
         buildConfig true
         compose true
-        prefab true
-        aidl true
+        prefab false
+        aidl false
     }
     sourceSets {
-        debug.assets.srcDir(file("$buildDir/generated/rish/debug/assets"))
-        release.assets.srcDir(file("$buildDir/generated/rish/release/assets"))
+        main.java {
+            srcDirs = ['src/main/java']
+            include 'moe/shizuku/manager/root/FileDigest.java'
+        }
+        main.kotlin {
+            srcDirs = ['src/main/java']
+            include 'moe/shizuku/manager/MainActivity.kt'
+            include 'moe/shizuku/manager/JwskApplication.kt'
+            include 'moe/shizuku/manager/app/AppActivity.kt'
+            include 'moe/shizuku/manager/about/**'
+            include 'moe/shizuku/manager/logs/ComputScreen.kt'
+            include 'moe/shizuku/manager/patch/**'
+            include 'moe/shizuku/manager/root/**'
+            include 'moe/shizuku/manager/ui/compose/ShizukuExpressive.kt'
+        }
     }
     signingConfigs {
         sign
@@ -43,12 +51,6 @@ android {
             shrinkResources true
             vcsInfo.include false
             proguardFiles 'proguard-rules.pro'
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path 'src/main/jni/CMakeLists.txt'
-            version = "3.22.1"
         }
     }
     packagingOptions {
@@ -120,11 +122,6 @@ afterEvaluate {
     if (tasks.findByName('optimizeReleaseResources') != null) {
         tasks.getByName('optimizeReleaseResources').finalizedBy(collapseReleaseResourceNames)
     }
-    tasks.getByName('preReleaseBuild').dependsOn(':shell:copyReleaseShellDex')
-    tasks.getByName('preDebugBuild').dependsOn(':shell:copyDebugShellDex')
-    tasks.getByName('mergeReleaseAssets').dependsOn(':shell:copyReleaseShellDex')
-    tasks.getByName('mergeDebugAssets').dependsOn(':shell:copyDebugShellDex')
-
     ['debug', 'release'].each { variantName ->
         def capitalized = variantName.capitalize()
         def copyApk = tasks.register("copy${capitalized}ManagerApk") {
@@ -166,15 +163,9 @@ configurations.configureEach {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0-rc02'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0-rc02'
-
-    implementation project(':server')
-    implementation project(':rish')
-    implementation project(':starter')
-    implementation project(':api')
-    implementation project(':provider')
-    implementation project(':common')
 
     implementation libs.hidden.compat
     compileOnly libs.hidden.stub
@@ -234,8 +225,6 @@ dependencies {
 
     implementation 'me.zhanghai.android.appiconloader:appiconloader:1.5.0'
 
-    implementation 'io.github.iamr0s:Dhizuku-API:2.5.4'
-
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
@@ -264,4 +253,25 @@ tasks.configureEach { task ->
             }
         }
     }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    exclude 'moe/shizuku/manager/ShizukuManagerProvider.kt'
+    exclude 'moe/shizuku/manager/adb/**'
+    exclude 'moe/shizuku/manager/authorization/**'
+    exclude 'moe/shizuku/manager/connector/**'
+    exclude 'moe/shizuku/manager/dhizuku/**'
+    exclude 'moe/shizuku/manager/home/**'
+    exclude 'moe/shizuku/manager/ktx/**'
+    exclude 'moe/shizuku/manager/legacy/**'
+    exclude 'moe/shizuku/manager/management/**'
+    exclude 'moe/shizuku/manager/model/**'
+    exclude 'moe/shizuku/manager/module/**'
+    exclude 'moe/shizuku/manager/receiver/**'
+    exclude 'moe/shizuku/manager/service/**'
+    exclude 'moe/shizuku/manager/settings/**'
+    exclude 'moe/shizuku/manager/shell/**'
+    exclude 'moe/shizuku/manager/starter/**'
+    exclude 'moe/shizuku/manager/utils/**'
+    exclude 'moe/shizuku/manager/widget/**'
 }

@@ -24,8 +24,6 @@ dependencyResolutionManagement {
             url = uri("https://jitpack.io")
             content {
                 includeGroup("com.github.topjohnwu.libsu")
-                includeGroup("io.github.iamr0s")
-                includeGroup("com.github.iamr0s")
             }
         }
     }
@@ -43,39 +41,4 @@ dependencyResolutionManagement {
     }
 }
 
-include ':server', ':starter', ':shell'
 include ':manager'
-include ':common'
-
-def root = "api"
-
-def propFile = file('local.properties')
-def props = new Properties()
-
-if (propFile.canRead()) {
-    props.load(new FileInputStream(propFile))
-
-    if (props != null) {
-        if (props["api.useLocal"].equals("true")) {
-            root = props["api.dir"]
-        }
-    }
-}
-
-include ':aidl'
-project(':aidl').projectDir = file("$root${File.separator}aidl")
-
-include ':rish'
-project(':rish').projectDir = file("$root${File.separator}rish")
-
-include ':shared'
-project(':shared').projectDir = file("$root${File.separator}shared")
-
-include ':api'
-project(':api').projectDir = file("$root${File.separator}api")
-
-include ':provider'
-project(':provider').projectDir = file("$root${File.separator}provider")
-
-include ':server-shared'
-project(':server-shared').projectDir = file("$root${File.separator}server-shared")
