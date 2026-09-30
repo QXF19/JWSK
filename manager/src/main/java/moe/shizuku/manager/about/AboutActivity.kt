@@ -1,6 +1,8 @@
 package moe.shizuku.manager.about
 
 import android.os.Bundle
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import moe.shizuku.manager.BuildConfig
 import moe.shizuku.manager.R
 import moe.shizuku.manager.app.AppActivity
 import moe.shizuku.manager.ui.compose.ShizukuExpressiveTheme
@@ -29,7 +29,6 @@ import moe.shizuku.manager.ui.compose.ShizukuLazyScaffold
 import moe.shizuku.manager.ui.compose.SettingsGroup
 import moe.shizuku.manager.ui.compose.SettingsRow
 import moe.shizuku.manager.ui.compose.GroupDivider
-import moe.shizuku.manager.utils.CustomTabsHelper
 
 class AboutActivity : AppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +65,7 @@ class AboutActivity : AppActivity() {
                     item {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
-                            text = "© 2026 RikkaApps & Community. Open Source Project.",
+                            text = "© 2026 JWSK Contributors · Open Source",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center,
@@ -150,14 +149,14 @@ class AboutActivity : AppActivity() {
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
                 Text(
-                    text = "What is JWSK?",
+                    text = "关于 JWSK",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Text(
-                    text = "JWSK combines a privileged ADB/root service with offline Magisk and KernelSU boot image patching. Patching only exports a new file and never writes a device partition automatically.",
+                    text = "JWSK 是面向 Android 12–16 的 Magisk 与 KernelSU Root 管理器，提供框架检测、Root 模块、Magisk 授权策略、Comput 超级用户终端、日志与离线镜像修补。修补功能只导出新文件，不会自动写入设备分区。",
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 20.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -169,31 +168,31 @@ class AboutActivity : AppActivity() {
     @Composable
     private fun AboutLinksGroup() {
         val context = this@AboutActivity
-        SettingsGroup(title = "Resources & Community") {
+        SettingsGroup(title = "项目与上游") {
             SettingsRow(
                 icon = R.drawable.ic_baseline_link_24,
                 title = stringResource(R.string.about_source_code_button),
                 summary = "github.com/QXF19/JWSK",
                 onClick = {
-                    CustomTabsHelper.launchUrlOrCopy(context, "https://github.com/QXF19/JWSK")
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/QXF19/JWSK")))
                 }
             )
             GroupDivider()
             SettingsRow(
                 icon = R.drawable.ic_baseline_link_24,
-                title = "Website",
-                summary = "shizuku.rikka.app",
+                title = "Magisk",
+                summary = "github.com/topjohnwu/Magisk",
                 onClick = {
-                    CustomTabsHelper.launchUrlOrCopy(context, "https://shizuku.rikka.app")
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/topjohnwu/Magisk")))
                 }
             )
             GroupDivider()
             SettingsRow(
                 icon = R.drawable.ic_outline_info_24,
-                title = "Support & Channel",
-                summary = "Join the community support",
+                title = "KernelSU",
+                summary = "github.com/tiann/KernelSU",
                 onClick = {
-                    CustomTabsHelper.launchUrlOrCopy(context, "https://t.me/rikkacommunity")
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/tiann/KernelSU")))
                 }
             )
         }

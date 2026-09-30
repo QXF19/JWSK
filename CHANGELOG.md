@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.0
+
+- Replaced the inherited Shizuku/ADB home with a dedicated Magisk + KernelSU Root manager UI.
+- Removed ADB pairing, wireless debugging, Shizuku Binder providers, receivers, services, watchdog and ADB module runtime components.
+- Removed the `server`, `rish`, `starter`, `api`, `provider` and shell-asset build dependencies from the manager APK.
+- Rebuilt Comput as a confirmed direct Root shell powered by Magisk/KernelSU through libsu.
+- Added a fixed Magisk/KernelSU visual theme and five Root-only navigation areas.
+- Kept Magisk policy management, Magisk/KernelSU module lifecycle operations, Root logs and Boot/kernel patching.
+- Updated the product documentation and security boundary for KernelSU application authorization.
+- Fixed false KernelSU detection when bundled ksud reports a zero kernel version.
+- Added framework-selection regression tests, Rust JNI load/version checks and Rust tests in release CI.
+- Rebuilt the Rust arm64/x86_64 libraries from source and added Java streaming SHA-256 verification.
+- Added bounded Comput output, a child shell and a 120-second command timeout.
+
 ## 1.1.1
 
 - Fixed the GitHub Actions Gradle wrapper execute permission failure.

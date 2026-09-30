@@ -36,12 +36,18 @@ fun RootPolicyScreen(environment: RootEnvironment, onBack: () -> Unit) {
     var policies by remember { mutableStateOf<List<RootPolicy>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
 
     fun reload() {
-        if (environment.backend != RootBackend.MAGISK) return
+        if (environment.backend != RootBackend.MAGISK || !environment.rootGranted) {
+            policies = emptyList()
+            return
+        }
         scope.launch {
             loading = true
-            policies = RootManager.listMagiskPolicies(context)
+            runCatching { RootManager.listMagiskPolicies(context) }
+                .onSuccess { policies = it }
+                .onFailure { policies = emptyList(); message = it.message }
             loading = false
         }
     }
@@ -62,7 +68,6 @@ fun RootPolicyScreen(environment: RootEnvironment, onBack: () -> Unit) {
                             RootBackend.MAGISK -> "管理 Magisk 已记录的超级用户策略。新应用首次请求仍由 Magisk 守护进程弹窗确认。"
                             RootBackend.KERNEL_SU -> "当前 KernelSU 内核只允许它认可签名的管理器修改应用授权。JWSK 不伪造管理器身份，以免造成授权失控。模块、修补、日志和 Comput 不受影响。"
                             RootBackend.HYBRID -> "双 Root 框架可能同时拦截请求。请只保留一个活动框架后再管理应用授权。"
-                            RootBackend.ADB -> "ADB 模式没有系统 Root 授权数据库；这里只管理 JWSK/Shizuku 可访问的应用。"
                             RootBackend.NONE -> "尚未检测到可管理的 Root 框架。"
                         }
                     )
@@ -98,17 +103,21 @@ fun RootPolicyScreen(environment: RootEnvironment, onBack: () -> Unit) {
                     Text(policy.appName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text("${policy.packageName.ifBlank { "未知包名" }} · UID ${policy.uid}", style = MaterialTheme.typography.bodySmall)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilledTonalButton(onClick = {
+                        FilledTonalButton(enabled = !busy, onClick = {
                             scope.launch {
-                                val result = RootManager.setMagiskPolicy(context, policy, !policy.allowed)
-                                message = if (result.code == 0) "授权策略已更新" else "更新失败：${result.output}"
+                                busy = true
+                                message = runCatching { RootManager.setMagiskPolicy(context, policy, !policy.allowed) }
+                                    .fold({ if (it.code == 0) "授权策略已更新" else "更新失败：${it.output}" }, { it.message })
+                                busy = false
                                 reload()
                             }
                         }) { Text(if (policy.allowed) "改为拒绝" else "允许") }
-                        OutlinedButton(onClick = {
+                        OutlinedButton(enabled = !busy, onClick = {
                             scope.launch {
-                                val result = RootManager.deleteMagiskPolicy(context, policy.uid)
-                                message = if (result.code == 0) "已恢复为首次询问" else "删除失败：${result.output}"
+                                busy = true
+                                message = runCatching { RootManager.deleteMagiskPolicy(context, policy.uid) }
+                                    .fold({ if (it.code == 0) "已恢复为首次询问" else "删除失败：${it.output}" }, { it.message })
+                                busy = false
                                 reload()
                             }
                         }) { Text("恢复询问") }

@@ -2,7 +2,6 @@ package moe.shizuku.manager.root
 
 enum class RootBackend {
     NONE,
-    ADB,
     MAGISK,
     KERNEL_SU,
     HYBRID
@@ -11,10 +10,10 @@ enum class RootBackend {
 data class RootEnvironment(
     val backend: RootBackend = RootBackend.NONE,
     val rootGranted: Boolean = false,
-    val adbActive: Boolean = false,
     val magiskVersion: String? = null,
     val kernelSuVersion: String? = null,
     val kernelMode: String? = null,
+    val statusDetail: String = "等待检测 Root 环境",
     val warning: String? = null
 ) {
     val title: String
@@ -22,8 +21,7 @@ data class RootEnvironment(
             RootBackend.MAGISK -> "Magisk ${magiskVersion.orEmpty()}".trim()
             RootBackend.KERNEL_SU -> "KernelSU ${kernelSuVersion.orEmpty()}".trim()
             RootBackend.HYBRID -> "Magisk + KernelSU"
-            RootBackend.ADB -> "ADB 激活"
-            RootBackend.NONE -> "尚未激活"
+            RootBackend.NONE -> "未检测到 Root"
         }
 
     val modeLabel: String
@@ -31,8 +29,7 @@ data class RootEnvironment(
             RootBackend.MAGISK -> "BOOT 修补"
             RootBackend.KERNEL_SU -> kernelMode ?: "内核修补"
             RootBackend.HYBRID -> "双框架"
-            RootBackend.ADB -> "ADB"
-            RootBackend.NONE -> "未激活"
+            RootBackend.NONE -> "无 Root"
         }
 
     val canManageRootModules: Boolean
