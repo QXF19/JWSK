@@ -23,6 +23,11 @@
 #include "uapi/app_profile.h"
 #include "klog.h" // IWYU pragma: keep
 
+#define CERT_MAX_LENGTH 4096
+#if EXPECTED_SIZE <= 0 || EXPECTED_SIZE > CERT_MAX_LENGTH
+#error "Configured manager certificate length exceeds the bounded parser limit"
+#endif
+
 struct sdesc {
     struct shash_desc shash;
     char ctx[];
@@ -115,8 +120,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
     if (certificate_size > INT_MAX || certificate_size > (u64)(certificates_end - *pos))
         return false;
 
-#define CERT_MAX_LENGTH 1024
-    if (certificate_size != expected_size)
+    if (!certificate_size || certificate_size != expected_size)
         return false;
 
     if (certificate_size > CERT_MAX_LENGTH) {
@@ -124,12 +128,20 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
         return false;
     }
 
-    char cert[CERT_MAX_LENGTH];
-    if (!read_exact(fp, cert, certificate_size, pos, certificates_end))
+    /* JWSK's existing RSA-4096 certificate is 1316 bytes. Allocate the exact
+     * bounded size instead of growing this kernel stack frame. */
+    unsigned char *cert = kmalloc(certificate_size, GFP_KERNEL);
+    if (!cert)
         return false;
+    if (!read_exact(fp, cert, certificate_size, pos, certificates_end)) {
+        kfree(cert);
+        return false;
+    }
 
     unsigned char digest[SHA256_DIGEST_SIZE];
-    if (ksu_sha256(cert, certificate_size, digest)) {
+    int hash_result = ksu_sha256(cert, certificate_size, digest);
+    kfree(cert);
+    if (hash_result) {
         pr_info("sha256 error\n");
         return false;
     }

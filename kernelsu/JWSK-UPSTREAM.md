@@ -64,3 +64,9 @@ Checkpoint (2026-10-14):
   order and builds matching LKM, ksuinit and ksud artifacts before the APK.
 - A release-backend receipt guard prevents packaging the stock daemon as a
   completed JWSK backend. No matching native CI artifact has yet been verified.
+- The first LKM CI run reached module linkage but failed artifact identity
+  validation. Source inspection found a substantive incompatibility: upstream's
+  1024-byte certificate cap always rejected JWSK's existing 1316-byte RSA-4096
+  certificate. The parser now bounds certificates at 4096 bytes, allocates the
+  exact length on the heap and frees it on every path. Exact expected length
+  and SHA-256 comparison remain mandatory. A new CI run must validate this fix.
