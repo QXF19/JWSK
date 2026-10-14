@@ -96,6 +96,21 @@ class ModuleGateTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Configuration drift"):
                 verify.check_config(source, changed)
 
+    def test_compile_time_release_header(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "utsrelease.h"
+            path.write_text('#define UTS_RELEASE "' + verify.KERNEL_RELEASE + '"\n')
+            verify.check_release_header(path)
+
+    def test_wrong_compile_time_release_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "utsrelease.h"
+            for text in ('#define UTS_RELEASE "6.1.23"\n', '',
+                         ('#define UTS_RELEASE "' + verify.KERNEL_RELEASE + '"\n') * 2):
+                path.write_text(text)
+                with self.assertRaisesRegex(ValueError, "UTS_RELEASE"):
+                    verify.check_release_header(path)
+
 
 if __name__ == "__main__":
     unittest.main()

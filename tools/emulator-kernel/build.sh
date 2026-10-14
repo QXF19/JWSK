@@ -14,6 +14,7 @@ clang_commit=eed2fff8b93ce059eea7ccd8fc5eee37f8adb432
 release=6.1.23-android14-4-00257-g7e35917775b8-ab9964412
 config="$repo/tools/emulator-kernel/emulator-api34.config"
 verify="$repo/tools/emulator-kernel/verify.py"
+cache="$RUNNER_TEMP/jwsk-api34-prepared-cache"
 
 git -C "$work/kernel" init
 git -C "$work/kernel" remote add origin https://android.googlesource.com/kernel/common
@@ -33,18 +34,65 @@ grep -Fq 'Android (9796371, based on r487747)' "$work/artifacts/clang-version.tx
 grep -Fq 'clang version 17.0.0' "$work/artifacts/clang-version.txt"
 sha256sum "$work/clang.tar.gz" > "$work/artifacts/toolchain-archive.sha256"
 
-cp "$config" "$work/out/.config"
+cache_hit=false
+if [[ -f "$cache/ready-v1" ]]; then
+    test "$(cat "$cache/kernel-commit")" = "$kernel_commit"
+    test "$(cat "$cache/clang-commit")" = "$clang_commit"
+    # Cache inputs are fixed and the cached config, compile-time release and
+    # reference driver's actual CRC/layout must all pass before reuse.
+    python3 "$verify" config "$config" "$cache/out/.config"
+    python3 "$verify" release-header "$cache/out/include/generated/utsrelease.h"
+    python3 "$verify" module "$cache/reference-virtio_net.ko"
+    cp -a "$cache/out/." "$work/out/"
+    cache_hit=true
+else
+    cp "$config" "$work/out/.config"
+fi
 make_args=(-C "$work/kernel" "O=$work/out" ARCH=x86_64 LLVM=1 LLVM_IAS=1
            "KERNELRELEASE=$release" 'KCFLAGS=-D__ANDROID_COMMON_KERNEL__')
 # KERNELRELEASE is the captured target's build identifier, not an altered .ko
 # string. Actual structural + module_layout CRC gates below are mandatory.
 make "${make_args[@]}" olddefconfig
 python3 "$verify" config "$config" "$work/out/.config"
-make "${make_args[@]}" -j2 vmlinux modules 2>&1 | tee "$work/artifacts/kernel-build.log"
+if [[ "$cache_hit" == true ]]; then
+    make "${make_args[@]}" -j2 modules_prepare 2>&1 | tee "$work/artifacts/kernel-build.log"
+else
+    make "${make_args[@]}" -j2 vmlinux modules 2>&1 | tee "$work/artifacts/kernel-build.log"
+fi
 test -s "$work/out/Module.symvers"
-test "$(make --no-print-directory -s "${make_args[@]}" kernelrelease)" = "$release"
 cp "$work/out/.config" "$work/artifacts/kernel.config"
 cp "$work/out/Module.symvers" "$work/artifacts/Module.symvers"
+cp "$work/out/include/generated/utsrelease.h" "$work/artifacts/utsrelease.h"
+# This Android Makefile's `kernelrelease` display target recomputes SCM metadata
+# instead of using the explicit KERNELRELEASE consumed by utsrelease.h. Verify
+# the compile-time header itself; the final ELF vermagic is independently gated.
+python3 "$verify" release-header "$work/out/include/generated/utsrelease.h"
+python3 "$verify" config "$config" "$work/out/.config"
+
+if [[ "$cache_hit" != true ]]; then
+    # Whitelist only public build products needed by external Kbuild. Never
+    # cache certs/, source signing keys, full out/, or the private .pem files.
+    python3 "$verify" module "$work/out/drivers/net/virtio_net.ko"
+    test ! -e "$cache"
+    mkdir -p "$cache/out/arch/x86" "$cache/out/security"
+    for file in .config Makefile Module.symvers vmlinux System.map; do
+        cp -a "$work/out/$file" "$cache/out/$file"
+    done
+    cp -a "$work/out/include" "$work/out/scripts" "$cache/out/"
+    cp -a "$work/out/arch/x86/include" "$cache/out/arch/x86/"
+    cp -a "$work/out/security/selinux" "$cache/out/security/"
+    cp "$work/out/drivers/net/virtio_net.ko" "$cache/reference-virtio_net.ko"
+    test -z "$(find "$cache" -type f \( -name '*.pem' -o -name '*.key' -o -name '*.p12' -o -name '*.pfx' \) -print -quit)"
+    if grep -rIlE -- '-----BEGIN ([A-Z0-9]+ )*PRIVATE KEY-----' "$cache"; then
+        printf 'Refusing to cache private key material\n' >&2
+        exit 1
+    fi
+    printf '%s\n' "$kernel_commit" > "$cache/kernel-commit"
+    printf '%s\n' "$clang_commit" > "$cache/clang-commit"
+    touch "$cache/ready-v1"
+fi
+# Save a validated prepared kernel even if a later KSU compilation fails.
+printf 'cache_ready=true\n' >> "$GITHUB_OUTPUT"
 
 # Do not patch modpost/check_exports, remove version tables, or invoke the
 # generic DDK check_symbol utility (which intentionally requires empty CRCs).

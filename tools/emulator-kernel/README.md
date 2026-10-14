@@ -44,6 +44,22 @@ CRC generation. The original modpost code remains untouched. The generic KSU
 check_symbol wrapper intentionally demands empty versions and is therefore not
 used for this distinct target-specific diagnostic build.
 
+The compile-time `include/generated/utsrelease.h` must match the captured target,
+as must the final ELF vermagic. This source revision's `make kernelrelease`
+display command recomputes its checkout's SCM suffix independently of the
+explicit build identifier; it is not the source of the compiled header value.
+
+The separate cache uses an exact kernel/compiler/config/Ubuntu/cache-format key
+and no prefix fallback. It whitelists only `.config`, Makefile, Module.symvers,
+vmlinux, System.map, generated include/scripts, x86 generated headers and SELinux
+build products. It never includes `certs/` or the entire output tree, and refuses
+private-key filenames or PEM markers before marking the cache ready. The
+reference `virtio_net.ko` must pass the target layout/CRC/version gate first.
+Cache reuse rechecks this reference, the full configuration and UTS_RELEASE;
+KSU is always freshly compiled and gated. Later KSU failures can therefore reuse
+the validated public kernel products without caching any signing secret. A new
+kernel input or whitelist format requires a new cache key.
+
 The pure-standard-library verifier rejects unexpected architecture, malformed
 ELF tables, wrong module layout, nonzero pointer relocation slots, missing target
 CRC, wrong version, or missing JWSK package/certificate hash. It does not establish

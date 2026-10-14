@@ -142,6 +142,14 @@ def check_config(original, generated):
     require(not changes, "Configuration drift: " + json.dumps(changes, sort_keys=True))
 
 
+def check_release_header(path):
+    """Check the actual compile-time release, not make's SCM display target."""
+    text = path.read_text(encoding="ascii")
+    definitions = re.findall(r'^\s*#\s*define\s+UTS_RELEASE\s+"([^"\r\n]*)"\s*$',
+                             text, re.MULTILINE)
+    require(definitions == [KERNEL_RELEASE], "Generated UTS_RELEASE does not match target")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -151,11 +159,16 @@ def main():
     config = commands.add_parser("config")
     config.add_argument("original", type=Path)
     config.add_argument("generated", type=Path)
+    release = commands.add_parser("release-header")
+    release.add_argument("path", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "config":
             check_config(args.original, args.generated)
             print("Captured target configuration preserved")
+        elif args.command == "release-header":
+            check_release_header(args.path)
+            print("Actual compiled UTS_RELEASE matches captured target")
         else:
             identity = None
             if args.identity:
