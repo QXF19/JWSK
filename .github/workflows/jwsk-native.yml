@@ -9,6 +9,8 @@ on:
       - '.github/workflows/jwsk-native.yml'
       - 'tools/AlphaApkSeal.java'
       - 'tools/AlphaApkSealTest.java'
+      - 'backends/magisk-alpha/**'
+      - '.github/workflows/jwsk-alpha.yml'
 
 concurrency:
   group: jwsk-native-${{ github.ref }}
@@ -18,6 +20,9 @@ permissions:
   contents: read
 
 jobs:
+  alpha:
+    uses: ./.github/workflows/jwsk-alpha.yml
+
   lkm:
     name: LKM ${{ matrix.kmi }}
     runs-on: ubuntu-latest
@@ -162,7 +167,7 @@ jobs:
           if-no-files-found: error
 
   manager:
-    needs: ksud
+    needs: [ksud, alpha]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -176,6 +181,10 @@ jobs:
           pattern: jwsk-ksud-*
           path: kernelsu/manager/app/src/main/jniLibs
           merge-multiple: true
+      - uses: actions/download-artifact@v8
+        with:
+          name: JWSK-Alpha-native-development
+          path: alpha-backend
       - name: Prepare SDK and release signing identity
         env:
           RELEASE_KEY: ${{ secrets.KEYSTORE }}
@@ -185,6 +194,45 @@ jobs:
           printf '%s' "$RELEASE_KEY" | base64 --decode > "$RUNNER_TEMP/jwsk-release.jks"
           echo "KEYSTORE_FILE=$RUNNER_TEMP/jwsk-release.jks" >> "$GITHUB_ENV"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;29.0.14206865' 'cmake;3.22.1'
+      - name: Prepare verified Alpha runtime and signed certificate anchor
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          (cd alpha-backend && sha256sum -c SHA256SUMS)
+          test "$(cat alpha-backend/source/upstream-commit.txt)" = 96221b69fae9910b1c0c75c2f92a4ebb2c2dc698
+          assets=kernelsu/manager/app/src/main/assets/alpha
+          mkdir -p "$assets" "$RUNNER_TEMP/alpha-seal-classes"
+          cp alpha-backend/scripts/*.sh "$assets/"
+          for abi in arm64-v8a x86_64; do
+            libs="kernelsu/manager/app/src/main/jniLibs/$abi"
+            for binary in magisk magiskinit magiskboot magiskpolicy; do
+              cp "alpha-backend/$abi/$binary" "$libs/libalpha_$binary.so"
+            done
+            cp "alpha-backend/$abi/libinit-ld.so" "$libs/libalpha_init_ld.so"
+          done
+          classes="$RUNNER_TEMP/alpha-seal-classes"
+          apksig="$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar"
+          javac -encoding UTF-8 -cp "$apksig" -d "$classes" tools/AlphaApkSeal.java tools/AlphaApkSealTest.java
+          java -cp "$classes:$apksig" AlphaApkSealTest
+          "$ANDROID_HOME/build-tools/37.0.0/aapt2" link --manifest backends/magisk-alpha/bootstrap/AndroidManifest.xml -I "$ANDROID_HOME/platforms/android-37.0/android.jar" -o "$RUNNER_TEMP/jwsk-bootstrap-unsigned.apk"
+          test "$("$ANDROID_HOME/build-tools/37.0.0/aapt2" dump packagename "$RUNNER_TEMP/jwsk-bootstrap-unsigned.apk")" = cn.jiangwang.jwsk
+          java -cp "$classes:$apksig" AlphaApkSeal --bootstrap "$RUNNER_TEMP/jwsk-bootstrap-unsigned.apk" "$assets/stub.apk"
+          {
+            printf 'ALPHA_SOURCE_COMMIT=96221b69fae9910b1c0c75c2f92a4ebb2c2dc698\nALPHA_VERSION_CODE=31000\nALPHA_MANAGER_PROTOCOL=1\n'
+            for abi in arm64-v8a x86_64; do
+              for binary in magisk magiskinit magiskboot magiskpolicy init_ld; do
+                digest=$(sha256sum "kernelsu/manager/app/src/main/jniLibs/$abi/libalpha_$binary.so" | cut -d ' ' -f 1)
+                printf 'ALPHA_SHA256_%s_%s=%s\n' "$abi" "$binary" "$digest"
+              done
+            done
+            for asset in boot_patch.sh util_functions.sh stub.apk; do
+              digest=$(sha256sum "$assets/$asset" | cut -d ' ' -f 1)
+              printf 'ALPHA_ASSET_SHA256_%s=%s\n' "$asset" "$digest"
+            done
+          } > "$assets/backend.properties"
       - name: Build and test the signed development manager
         working-directory: kernelsu/manager
         env:

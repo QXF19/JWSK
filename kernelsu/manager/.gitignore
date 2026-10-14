@@ -9,3 +9,4 @@ captures
 local.properties
 key.jks
 /app/src/main/assets/jwsk_backend.properties
+/app/src/main/assets/alpha/

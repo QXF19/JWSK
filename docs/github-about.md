@@ -1,6 +1,6 @@
-# GitHub About 待更新内容
+# GitHub About
 
-以下是与当前开发阶段相符的仓库简介草稿，尚未通过 GitHub 设置应用：
+以下简介已于 2026-10-14 更新到 QXF19/JWSK，并读回确认：
 
 > Android 14+ 独立 Root 管理器重构：KernelSU 原生管理、Magisk Alpha 集成开发、Miuix 玻璃界面、AI 文本助手与手动 Comput。稳定性优先，开发中。
 

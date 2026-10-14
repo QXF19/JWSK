@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.jiangwang.jwsk"
+    android:versionCode="1"
+    android:versionName="1.0-bootstrap">
+    <uses-sdk android:minSdkVersion="34" android:targetSdkVersion="36" />
+    <!-- Certificate anchor only. No executable code, permissions or auto-download. -->
+    <application
+        android:hasCode="false"
+        android:allowBackup="false"
+        android:label="JWSK Bootstrap" />
+</manifest>

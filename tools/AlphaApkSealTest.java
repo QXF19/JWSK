@@ -47,7 +47,20 @@ public final class AlphaApkSealTest {
                 AlphaApkSeal.readComment(bad);
                 throw new AssertionError("Missing EOCD accepted");
             } catch (IllegalArgumentException expected) { }
-            System.out.println("Alpha APK comment tests passed (7 cases)");
+            try (var stream = new ZipOutputStream(Files.newOutputStream(bad))) {
+                stream.putNextEntry(new ZipEntry("AndroidManifest.xml"));
+                stream.write(new byte[]{3, 0, 8, 0, 8, 0, 0, 0});
+                stream.closeEntry();
+            }
+            AlphaApkSeal.verifyBootstrapShape(bad);
+            try (var stream = new ZipOutputStream(Files.newOutputStream(bad))) {
+                stream.putNextEntry(new ZipEntry("classes.dex")); stream.write(new byte[8]); stream.closeEntry();
+            }
+            try {
+                AlphaApkSeal.verifyBootstrapShape(bad);
+                throw new AssertionError("Executable bootstrap accepted");
+            } catch (SecurityException expected) { }
+            System.out.println("Alpha APK comment and bootstrap tests passed (9 cases)");
         } finally {
             Files.deleteIfExists(zip);
             Files.deleteIfExists(bad);

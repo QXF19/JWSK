@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.ZipFile;
 
 /** Build-time only: add Alpha's version-comment protocol BEFORE re-signing the APK. */
 public final class AlphaApkSeal {
@@ -22,8 +23,10 @@ public final class AlphaApkSeal {
 
     public static void main(String[] args) {
         try {
-            if (args.length != 2) throw new IllegalArgumentException("Expected input and new output APK paths");
-            seal(Path.of(args[0]).toAbsolutePath().normalize(), Path.of(args[1]).toAbsolutePath().normalize());
+            boolean bootstrap = args.length == 3 && args[0].equals("--bootstrap");
+            if (args.length != 2 && !bootstrap) throw new IllegalArgumentException("Expected input and new output APK paths");
+            int offset = bootstrap ? 1 : 0;
+            seal(Path.of(args[offset]).toAbsolutePath().normalize(), Path.of(args[offset + 1]).toAbsolutePath().normalize(), bootstrap);
             System.out.println("Alpha manager protocol and original JWSK v2/v3 signing identity verified");
         } catch (Exception error) {
             // Signing providers can include their arguments in exception messages.
@@ -34,10 +37,15 @@ public final class AlphaApkSeal {
     }
 
     static void seal(Path input, Path output) throws Exception {
+        seal(input, output, false);
+    }
+
+    private static void seal(Path input, Path output, boolean bootstrap) throws Exception {
         if (!Files.isRegularFile(input) || Files.exists(output) || input.equals(output)) {
             throw new IllegalArgumentException("Input must exist and output must be a new file");
         }
-        verify(input);
+        if (bootstrap) verifyBootstrapShape(input);
+        else verify(input);
         Properties properties = new Properties();
         String propertiesPath = System.getenv("JWSK_SIGNING_PROPERTIES");
         Path configuration = propertiesPath == null ? null : Path.of(propertiesPath).toAbsolutePath();
@@ -84,6 +92,41 @@ public final class AlphaApkSeal {
                 Files.deleteIfExists(staging.resolve("protocol.apk"));
                 Files.deleteIfExists(staging.resolve("sealed.apk"));
                 Files.deleteIfExists(staging);
+            }
+        }
+    }
+
+    /** Only our AAPT-generated no-code certificate anchor may start unsigned. */
+    static void verifyBootstrapShape(Path input) throws Exception {
+        try (var zip = new ZipFile(input.toFile())) {
+            if (zip.size() < 1 || zip.size() > 2) throw new SecurityException("Unexpected bootstrap entries");
+            var entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                String name = entries.nextElement().getName();
+                if (!name.equals("AndroidManifest.xml") && !name.equals("resources.arsc")) {
+                    throw new SecurityException("Executable or unexpected bootstrap entry");
+                }
+            }
+            var resources = zip.getEntry("resources.arsc");
+            if (resources != null) {
+                if (resources.getSize() < 12 || resources.getSize() > 1024) throw new SecurityException("Non-empty bootstrap resources");
+                try (var stream = zip.getInputStream(resources)) {
+                    byte[] header = stream.readNBytes(12);
+                    if (!Arrays.equals(Arrays.copyOf(header, 4), new byte[]{2, 0, 12, 0})
+                        || header[8] != 0 || header[9] != 0 || header[10] != 0 || header[11] != 0) {
+                        throw new SecurityException("Bootstrap must not contain a resource package");
+                    }
+                }
+            }
+            var entry = zip.getEntry("AndroidManifest.xml");
+            if (entry == null || entry.isDirectory() || entry.getSize() < 8 || entry.getSize() > 65536) {
+                throw new SecurityException("Invalid bootstrap manifest");
+            }
+            // Android binary XML header, not a source XML or an executable carrier.
+            try (var stream = zip.getInputStream(entry)) {
+                if (!Arrays.equals(stream.readNBytes(4), new byte[]{3, 0, 8, 0})) {
+                    throw new SecurityException("Expected compiled bootstrap manifest");
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ name: JWSK Magisk Alpha backend validation
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches: [codex/ksu-native-manager]
     paths:
@@ -9,7 +10,7 @@ on:
       - '.github/workflows/jwsk-alpha.yml'
 
 concurrency:
-  group: jwsk-alpha-${{ github.ref }}
+  group: jwsk-alpha-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -58,6 +59,8 @@ jobs:
           set -euo pipefail
           git apply --check ../backends/magisk-alpha/patches/0002-jwsk-manager-package.patch
           git apply ../backends/magisk-alpha/patches/0002-jwsk-manager-package.patch
+          git apply --check ../backends/magisk-alpha/patches/0003-readonly-manager-identity.patch
+          git apply ../backends/magisk-alpha/patches/0003-readonly-manager-identity.patch
           grep -Fq 'default = ["check-signature", "check-client", "su-check-db"]' native/src/core/Cargo.toml
           python3 build.py -r native
       - name: Check and lint the modified Rust backend
@@ -72,7 +75,7 @@ jobs:
           # The pinned upstream/submodules have pre-existing workspace-format
           # differences with ONDK's formatter. Check the native file we change,
           # without recursively reformatting unrelated vendored dependencies.
-          python3 ../../scripts/env.py rustfmt --edition 2024 --config skip_children=true --check include/consts.rs
+          python3 ../../scripts/env.py rustfmt --edition 2024 --config skip_children=true --check include/consts.rs core/lib.rs core/daemon.rs core/magisk.rs
       - name: Collect runtime binaries and source provenance
         shell: bash
         run: |
@@ -92,7 +95,7 @@ jobs:
           cp -R backends/magisk-alpha/patches "$output/source/"
           git -C alpha-build rev-parse HEAD > "$output/source/upstream-commit.txt"
           git -C alpha-build submodule status --recursive > "$output/source/submodules.txt"
-          git -C alpha-build diff -- scripts/env.py native/src/include/consts.rs > "$output/source/applied.patch"
+          git -C alpha-build diff -- scripts/env.py native/src/include/consts.rs native/src/core/lib.rs native/src/core/daemon.rs native/src/core/magisk.rs > "$output/source/applied.patch"
           cd "$output"
           find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
       - uses: actions/upload-artifact@v7

@@ -15,13 +15,19 @@ configuration sets the Alpha protocol version to 31000 independently of JWSK's
 Android application version. No release APK or unverified third-party binary
 is used as the native backend input.
 
-Two minimal patches are applied in order:
+Three focused patches are applied in order:
 
 1. Propagate the environment wrapper's subprocess exit status, so a failed
    standalone check cannot silently pass CI.
 2. After upstream native code generation, change only the expected original
    manager package to `cn.jiangwang.jwsk`. The `check-signature`, `check-client`
    and `su-check-db` default features remain enabled.
+3. Append a read-only manager-identity request without renumbering upstream
+   protocol values. It compares the kernel-provided caller UID with the manager
+   UID obtained by the existing certificate-verifying code. It grants nothing,
+   does not request su and retains the existing client-inode check. The running
+   daemon's own executable must therefore be used as the client, not an arbitrary
+   APK-bundled copy.
 
 The output contains `magisk`, `magiskinit`, `magiskboot`, `magiskpolicy` and
 `libinit-ld.so`, their SHA-256 checksums, the unchanged patch scripts, license,
@@ -29,7 +35,7 @@ source revision and local patches. It excludes Rust static libraries and caches.
 Native artifacts are development inputs, not an installable or boot-tested APK.
 
 Both 64-bit targets receive workspace compilation and strict Clippy checks.
-Formatting is checked on the modified `include/consts.rs`, with child traversal
+Formatting is checked on the four modified Rust source files, with child traversal
 disabled: the pinned upstream and third-party submodules have pre-existing
 whole-workspace formatting differences under ONDK r30.1. Those unrelated files
 are preserved rather than silently reformatted or counted as JWSK changes.
