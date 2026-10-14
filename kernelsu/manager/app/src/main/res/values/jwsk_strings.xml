@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="jwsk_alpha_patch_description">Select a boot or init_boot image matching your firmware. Alpha patches a private copy; export the result when complete. Verify device compatibility before installing it.</string>
+    <string name="jwsk_alpha_select">Select boot / init_boot image</string>
+    <string name="jwsk_alpha_patch">Patch selected image</string>
+    <string name="jwsk_alpha_export">Save patched image</string>
+    <string name="jwsk_alpha_verity">Preserve verity</string>
+    <string name="jwsk_alpha_encrypt">Preserve force encryption</string>
+    <string name="jwsk_alpha_vbmeta">Patch vbmeta flags</string>
+    <string name="jwsk_alpha_recovery">Recovery mode</string>
+    <string name="jwsk_alpha_sar">Legacy system-as-root</string>
+    <string name="jwsk_alpha_failed">Operation failed. Check the image, free space and log, then retry. An interrupted export may leave an incomplete destination file.</string>
+    <string name="jwsk_alpha_saved">Patched image saved. The original image is unchanged.</string>
     <string name="jwsk_lkm_patch">KernelSU installation and boot image patching</string>
     <string name="jwsk_gki_import">Import a compiled GKI artifact</string>
     <string name="jwsk_gki_import_description">Select your own compiled Image, Image.gz or boot image. The app checks its structure and SHA-256; compatibility and bootability require separate verification.</string>

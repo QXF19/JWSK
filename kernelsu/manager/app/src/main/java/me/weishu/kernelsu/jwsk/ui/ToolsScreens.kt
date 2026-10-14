@@ -79,7 +79,11 @@ fun ComputScreen() {
     var command by remember { mutableStateOf("id") }
     var output by remember { mutableStateOf("") }
     var running by remember { mutableStateOf(false) }
-    val canRun = Natives.isManager && Natives.kernelUAPIVersion == Natives.managerUAPIVersion
+    var alphaManager by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        alphaManager = me.weishu.kernelsu.jwsk.alpha.AlphaClient(me.weishu.kernelsu.ksuApp).probe().trustedManager
+    }
+    val canRun = alphaManager || (Natives.isManager && Natives.kernelUAPIVersion == Natives.managerUAPIVersion)
     val errorText = stringResource(R.string.jwsk_comput_failed)
     val exitLabel = stringResource(R.string.jwsk_exit_code)
     val confirm = rememberConfirmDialog(onConfirm = {

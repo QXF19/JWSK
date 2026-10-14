@@ -26,6 +26,9 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
+// Opt-in emulator instrumentation only. Never change the ordinary debug identity.
+val useIdentityTestSigning = providers.gradleProperty("JWSK_IDENTITY_TEST_SIGNING")
+    .orNull?.toBooleanStrictOrNull() == true
 val defaultManagerPackageName = if (isPrBuild) "me.weishu.kernelsu.pr" else "me.weishu.kernelsu"
 val defaultManagerName = if (isPrBuild) "KernelSU PR" else "KernelSU"
 val managerPackageName = project.findProperty("KSU_PACKAGE_NAME")?.toString() ?: "cn.jiangwang.jwsk"
@@ -113,6 +116,9 @@ val verifyReleaseBackend = tasks.register("verifyReleaseBackend") {
 tasks.configureEach {
     if (name == "preReleaseBuild" || name == "validateSigningRelease") dependsOn(verifyReleaseSigning)
     if (name == "preReleaseBuild") dependsOn(verifyReleaseBackend)
+    if (useIdentityTestSigning && (name == "preDebugBuild" || name == "validateSigningDebug")) {
+        dependsOn(verifyReleaseSigning)
+    }
 }
 
 protobuf {
@@ -157,6 +163,7 @@ android {
 
     buildTypes {
         debug {
+            if (useIdentityTestSigning) signingConfig = signingConfigs.getByName("jwskRelease")
             externalNativeBuild {
                 cmake {
                     arguments += listOf("-DCMAKE_CXX_FLAGS_DEBUG=-Og", "-DCMAKE_C_FLAGS_DEBUG=-Og")
@@ -207,6 +214,9 @@ android {
         }
         jniLibs {
             useLegacyPackaging = true
+            // These executables are already built/verified upstream. AGP stripping
+            // changes their bytes, invalidating both receipts and daemon inode hashes.
+            keepDebugSymbols += setOf("**/libalpha_*.so", "**/libksud.so")
             excludes += "lib/*/libandroidx.graphics.path.so"
         }
     }
@@ -240,6 +250,7 @@ android {
         versionCode = managerVersionCode
         versionName = managerVersionName
         applicationId = managerPackageName
+        testInstrumentationRunner = "me.weishu.kernelsu.jwsk.alpha.AlphaRuntimeInstrumentation"
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
         // Backend identity must not be compared with JWSK's independent APK version.

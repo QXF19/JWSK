@@ -27,6 +27,8 @@ data class HomeUiState(
     val systemInfo: SystemInfo,
     val isLoading: Boolean = false,
     val detectionFailed: Boolean = false,
+    val alphaVersion: String? = null,
+    val alphaManager: Boolean = false,
 ) {
     val isSELinuxPermissive: Boolean
         get() = systemInfo.selinuxStatus == "Permissive"

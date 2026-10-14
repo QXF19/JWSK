@@ -42,6 +42,8 @@ fun InstallHubScreen() {
                 Card {
                     ArrowPreference(title = "KernelSU LKM", summary = stringResource(R.string.jwsk_lkm_patch),
                         onClick = { navigator.push(Route.KernelSuInstall) })
+                    ArrowPreference(title = "Magisk Alpha", summary = stringResource(R.string.jwsk_alpha_select),
+                        onClick = { navigator.push(Route.AlphaPatch) })
                 }
             }
             item {

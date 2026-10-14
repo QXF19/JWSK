@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="jwsk_alpha_patch_description">选择与当前固件匹配的 boot 或 init_boot 镜像。Alpha 修补私有副本，完成后可保存结果；安装前需确认设备兼容性。</string>
+    <string name="jwsk_alpha_select">选择 boot / init_boot 镜像</string>
+    <string name="jwsk_alpha_patch">修补所选镜像</string>
+    <string name="jwsk_alpha_export">保存修补后的镜像</string>
+    <string name="jwsk_alpha_verity">保留 verity 校验</string>
+    <string name="jwsk_alpha_encrypt">保留强制加密</string>
+    <string name="jwsk_alpha_vbmeta">修补 vbmeta 标志</string>
+    <string name="jwsk_alpha_recovery">Recovery 模式</string>
+    <string name="jwsk_alpha_sar">旧版 system-as-root</string>
+    <string name="jwsk_alpha_failed">操作失败，请检查镜像、可用空间和日志后重试。保存被中断时，目标文件可能不完整。</string>
+    <string name="jwsk_alpha_saved">修补镜像已保存，原镜像保持不变。</string>
     <string name="jwsk_lkm_patch">KernelSU 安装与启动镜像修补</string>
     <string name="jwsk_gki_import">接收自编译 GKI 产物</string>
     <string name="jwsk_gki_import_description">选择自行编译的 Image、Image.gz 或 boot 镜像。软件核对结构和 SHA-256；兼容性和能否启动需另行验证。</string>

@@ -223,6 +223,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.ModuleRepoDetail>(swipeDismiss = swipeDismiss) { key -> ModuleRepoDetailScreen(key.module) }
                             entry<Route.Install>(swipeDismiss = swipeDismiss) { me.weishu.kernelsu.jwsk.ui.InstallHubScreen() }
                             entry<Route.KernelSuInstall>(swipeDismiss = swipeDismiss) { InstallScreen() }
+                            entry<Route.AlphaPatch>(swipeDismiss = swipeDismiss) { me.weishu.kernelsu.jwsk.ui.AlphaPatchScreen() }
                             entry<Route.Flash>(swipeDismiss = if (flashBackEnabled) swipeDismiss else NavSwipeDirection.None) { key ->
                                 FlashScreen(
                                     key.flashIt,

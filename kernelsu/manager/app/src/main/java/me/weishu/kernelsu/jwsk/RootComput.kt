@@ -13,7 +13,11 @@ data class ComputResult(val code: Int, val output: String)
 object RootComput {
     suspend fun execute(command: String): ComputResult = withContext(Dispatchers.IO) {
         require(command.isNotBlank() && command.length <= 8192 && '\u0000' !in command)
-        check(Natives.isManager && Natives.kernelUAPIVersion == Natives.managerUAPIVersion)
+        if (!Natives.isManager) {
+            val result = me.weishu.kernelsu.jwsk.alpha.AlphaClient(ksuApp).root(command)
+            return@withContext ComputResult(result.exitCode(), result.output())
+        }
+        check(Natives.kernelUAPIVersion == Natives.managerUAPIVersion)
         val daemon = File(ksuApp.applicationInfo.nativeLibraryDir, "libksud.so")
         Shell.Builder.create().setTimeout(10).build(daemon.absolutePath, "debug", "su").use { shell ->
             check(shell.isRoot)

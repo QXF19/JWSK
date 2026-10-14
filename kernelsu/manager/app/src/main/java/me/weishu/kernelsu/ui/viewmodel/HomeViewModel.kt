@@ -61,7 +61,8 @@ class HomeViewModel(
         }
     }
 
-    private fun buildState(): HomeUiState {
+    private suspend fun buildState(): HomeUiState {
+        val alpha = me.weishu.kernelsu.jwsk.alpha.AlphaClient(ksuApp).probe()
         val kernelVersion = getKernelVersion()
         val isManager = Natives.isManager
         val ksuVersion = if (isManager) Natives.version else null
@@ -73,6 +74,8 @@ class HomeViewModel(
         val managerVersion = getManagerVersion(ksuApp)
 
         return HomeUiState(
+            alphaVersion = alpha.version,
+            alphaManager = alpha.trustedManager,
             kernelVersion = kernelVersion,
             ksuVersion = ksuVersion,
             lkmMode = lkmMode,

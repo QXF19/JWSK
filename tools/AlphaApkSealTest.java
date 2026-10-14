@@ -24,7 +24,21 @@ public final class AlphaApkSealTest {
             check(Arrays.equals(AlphaApkSeal.readComment(zip), AlphaApkSeal.COMMENT));
             try (var archive = new ZipFile(zip.toFile())) {
                 check(Arrays.equals(archive.getInputStream(archive.getEntry("payload")).readAllBytes(), payload));
+                String digest = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(payload));
+                AlphaApkSeal.checkDigest(archive, "payload", digest, 1024);
+                try {
+                    AlphaApkSeal.checkDigest(archive, "payload", "0".repeat(64), 1024);
+                    throw new AssertionError("Changed native artifact accepted");
+                } catch (SecurityException expected) { }
+                try {
+                    AlphaApkSeal.checkDigest(archive, "payload", digest, 4);
+                    throw new AssertionError("Oversized artifact accepted");
+                } catch (SecurityException expected) { }
             }
+            try {
+                AlphaApkSeal.verifyPackagedBackends(zip);
+                throw new AssertionError("Missing backend receipts accepted");
+            } catch (SecurityException expected) { }
             // A fake EOCD signature inside a comment must not confuse the scanner.
             byte[] nested = new byte[]{0x50, 0x4b, 0x05, 0x06, 4, 3, 2, 1};
             AlphaApkSeal.replaceComment(zip, nested);
@@ -60,7 +74,7 @@ public final class AlphaApkSealTest {
                 AlphaApkSeal.verifyBootstrapShape(bad);
                 throw new AssertionError("Executable bootstrap accepted");
             } catch (SecurityException expected) { }
-            System.out.println("Alpha APK comment and bootstrap tests passed (9 cases)");
+            System.out.println("Alpha APK comment, bootstrap and artifact tests passed (13 cases)");
         } finally {
             Files.deleteIfExists(zip);
             Files.deleteIfExists(bad);

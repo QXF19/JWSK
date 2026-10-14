@@ -45,7 +45,10 @@ public final class AlphaApkSeal {
             throw new IllegalArgumentException("Input must exist and output must be a new file");
         }
         if (bootstrap) verifyBootstrapShape(input);
-        else verify(input);
+        else {
+            verify(input);
+            verifyPackagedBackends(input);
+        }
         Properties properties = new Properties();
         String propertiesPath = System.getenv("JWSK_SIGNING_PROPERTIES");
         Path configuration = propertiesPath == null ? null : Path.of(propertiesPath).toAbsolutePath();
@@ -81,6 +84,7 @@ public final class AlphaApkSeal {
                 .setAlignmentPreserved(true).setLibraryPageAlignmentBytes(16384)
                 .setOtherSignersSignaturesPreserved(false).build().sign();
             verify(signed);
+            if (!bootstrap) verifyPackagedBackends(signed);
             if (!Arrays.equals(readComment(signed), COMMENT)) throw new SecurityException("Protocol comment changed");
             Files.move(signed, output); // Never replace an existing artifact or the input APK.
         } finally {
@@ -93,6 +97,78 @@ public final class AlphaApkSeal {
                 Files.deleteIfExists(staging.resolve("sealed.apk"));
                 Files.deleteIfExists(staging);
             }
+        }
+    }
+
+    /** Verify final APK entries, not only the files before AGP native stripping. */
+    static void verifyPackagedBackends(Path apk) throws Exception {
+        try (var zip = new ZipFile(apk.toFile())) {
+            Properties ksu = receipt(zip, "assets/jwsk_backend.properties");
+            Properties alpha = receipt(zip, "assets/alpha/backend.properties");
+            if (!"cn.jiangwang.jwsk".equals(ksu.getProperty("KSU_PACKAGE_NAME"))
+                || !CERTIFICATE.equals(ksu.getProperty("KSU_EXPECTED_HASH"))
+                || !"0x0524".equals(ksu.getProperty("KSU_EXPECTED_SIZE"))
+                || !"32680".equals(ksu.getProperty("KSU_PINNED_VERSION"))
+                || !"0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d".equals(ksu.getProperty("KSU_SOURCE_COMMIT"))
+                || !"96221b69fae9910b1c0c75c2f92a4ebb2c2dc698".equals(alpha.getProperty("ALPHA_SOURCE_COMMIT"))
+                || !"31000".equals(alpha.getProperty("ALPHA_VERSION_CODE"))
+                || !"1".equals(alpha.getProperty("ALPHA_MANAGER_PROTOCOL"))) {
+                throw new SecurityException("Unexpected backend identity receipt");
+            }
+            for (String abi : List.of("arm64-v8a", "x86_64")) {
+                checkDigest(zip, "lib/" + abi + "/libksud.so", ksu.getProperty("KSUD_SHA256_" + abi), 32 * 1024 * 1024);
+                for (String binary : List.of("magisk", "magiskinit", "magiskboot", "magiskpolicy", "init_ld")) {
+                    checkDigest(zip, "lib/" + abi + "/libalpha_" + binary + ".so",
+                        alpha.getProperty("ALPHA_SHA256_" + abi + "_" + binary), 32 * 1024 * 1024);
+                }
+            }
+            for (String asset : List.of("boot_patch.sh", "util_functions.sh", "stub.apk")) {
+                checkDigest(zip, "assets/alpha/" + asset, alpha.getProperty("ALPHA_ASSET_SHA256_" + asset), 256 * 1024);
+            }
+            Path anchor = Files.createTempFile("jwsk-alpha-anchor-verify-", ".apk");
+            try {
+                try (var stream = zip.getInputStream(zip.getEntry("assets/alpha/stub.apk"))) {
+                    Files.write(anchor, stream.readNBytes(256 * 1024 + 1));
+                }
+                verify(anchor);
+                if (!Arrays.equals(readComment(anchor), COMMENT)) throw new SecurityException("Invalid anchor protocol");
+            } finally { Files.deleteIfExists(anchor); }
+        }
+    }
+
+    private static Properties receipt(ZipFile zip, String name) throws Exception {
+        var entry = zip.getEntry(name);
+        if (entry == null || entry.isDirectory() || entry.getSize() < 1 || entry.getSize() > 65536) {
+            throw new SecurityException("Missing or oversized backend receipt");
+        }
+        Properties properties = new Properties();
+        try (var stream = zip.getInputStream(entry)) {
+            byte[] bytes = stream.readNBytes(65537);
+            if (bytes.length > 65536) throw new SecurityException("Oversized backend receipt");
+            properties.load(new java.io.ByteArrayInputStream(bytes));
+        }
+        return properties;
+    }
+
+    static void checkDigest(ZipFile zip, String name, String expected, int limit) throws Exception {
+        var entry = zip.getEntry(name);
+        if (expected == null || !expected.matches("[a-f0-9]{64}") || entry == null || entry.isDirectory()
+            || entry.getSize() < 1 || entry.getSize() > limit) {
+            throw new SecurityException("Missing or invalid backend artifact");
+        }
+        var digest = MessageDigest.getInstance("SHA-256");
+        int total = 0;
+        try (var stream = zip.getInputStream(entry)) {
+            byte[] buffer = new byte[65536];
+            int count;
+            while ((count = stream.read(buffer)) != -1) {
+                total += count;
+                if (total > limit) throw new SecurityException("Oversized backend artifact");
+                digest.update(buffer, 0, count);
+            }
+        }
+        if (total != entry.getSize() || !HexFormat.of().formatHex(digest.digest()).equals(expected)) {
+            throw new SecurityException("Packaged backend differs from verified source artifact");
         }
     }
 

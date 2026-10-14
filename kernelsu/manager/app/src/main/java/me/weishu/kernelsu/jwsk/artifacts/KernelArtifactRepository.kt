@@ -12,7 +12,7 @@ import java.io.File
 import java.io.IOException
 
 /** Owns only app-private copies, never the selected document or any boot partition. */
-internal class KernelArtifactRepository(context: Context) {
+internal class KernelArtifactRepository(context: Context, private val bootImageOnly: Boolean = false) {
     private val resolver = context.applicationContext.contentResolver
     private val directory = File(context.applicationContext.cacheDir, "jwsk-kernel-artifacts")
 
@@ -23,13 +23,24 @@ internal class KernelArtifactRepository(context: Context) {
     )
 
     /** Copies immutable input bytes for inspection; no compilation, patching or flashing. */
-    suspend fun accept(uri: Uri): AcceptedArtifact = withContext(Dispatchers.IO) {
+    suspend fun accept(uri: Uri): AcceptedArtifact {
+        var pending: File? = null
+        try {
+            return withContext(Dispatchers.IO) { acceptCopy(uri) { pending = it } }
+        } catch (failure: Throwable) {
+            withContext(kotlinx.coroutines.NonCancellable + Dispatchers.IO) { pending?.delete() }
+            throw failure
+        }
+    }
+
+    private suspend fun acceptCopy(uri: Uri, created: (File) -> Unit): AcceptedArtifact {
         val (displayName, reportedSize) = readMetadata(uri)
         if (reportedSize > KernelArtifactInspector.MAX_BYTES) {
             throw KernelArtifactInspector.InvalidArtifactException(KernelArtifactInspector.Problem.TOO_LARGE)
         }
         if (!directory.isDirectory && !directory.mkdirs()) throw IOException("Artifact cache unavailable")
         val localFile = File.createTempFile("artifact-", ".bin", directory)
+        created(localFile)
         try {
             val coroutineContext = currentCoroutineContext()
             resolver.openInputStream(uri)?.use { input ->
@@ -50,8 +61,11 @@ internal class KernelArtifactRepository(context: Context) {
                 }
             } ?: throw IOException("Selected document cannot be read")
             coroutineContext.ensureActive()
-            val inspection = runInterruptible { KernelArtifactInspector.inspect(localFile) }
-            AcceptedArtifact(displayName, inspection, localFile)
+            val inspection = runInterruptible {
+                if (bootImageOnly) KernelArtifactInspector.inspectBootImage(localFile)
+                else KernelArtifactInspector.inspect(localFile)
+            }
+            return AcceptedArtifact(displayName, inspection, localFile)
         } catch (failure: Throwable) {
             localFile.delete() // Exact file created by this operation; never delete the user's URI.
             throw failure

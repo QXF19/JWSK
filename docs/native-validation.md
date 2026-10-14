@@ -90,3 +90,37 @@ Date: 2026-10-14. This is a development checkpoint, not a release approval.
   finish; local source work and local tests continued.
   The user then requested continuation, and a normal approval check succeeded;
   GitHub status reads and artifact downloads resumed.
+
+## 2026-10-15: Alpha runtime checkpoint
+
+- Combined CI run 38593966791 and Alpha run 38593966804 succeeded at
+  b9b8d11e347d092f625f61bd032edd87b2b57cfa. About has been applied and the
+  rewritten README uploaded to the development branch; earlier notes above
+  describe the state of their respective checkpoints.
+- Application-UID instrumentation on the dedicated Android 14 x86_64 AVD
+  verified all five Alpha executable hashes, script hashes and the original
+  JWSK certificate in the embedded bootstrap APK.
+- A v4 init_boot fixture containing the unmodified SDK ramdisk was actually
+  patched by Alpha. Its output parsed successfully and contained Magisk's
+  ramdisk marker; input SHA-256 remained unchanged, and the private work
+  directory was removed after release. No partition was flashed.
+- A temporary Alpha live setup, adapted from the pinned upstream emulator
+  script, accepted JWSK's original signing identity. The application process
+  queried the read-only manager protocol and executed `id -u`, receiving 0.
+  This validates the live daemon integration, not cold boot or physical OEMs.
+- Runtime validation caught AGP stripping native executable bytes after the
+  build receipts were generated. Packaging now preserves Alpha and ksud
+  executables. The APK seal tool verifies both ABIs and all asset digests
+  from the final APK before and after signing, and validates the anchor APK.
+  Its 13 ZIP/bootstrap/artifact checks pass.
+- The new offline patch screen lives only under Install and patch. It uses
+  Android document selection/export, bounded subprocesses and cancellation;
+  private input and output ownership survives rotation through a ViewModel.
+- KernelSU's generic DDK module did not load on this AVD's older 6.1.23 kernel.
+  The target struct module is 0x380 bytes with init at 0x150; the DDK module
+  expects 0x400 and 0x180. No relocation or signature checks were bypassed.
+  Matching-kernel validation remains open.
+- The user has no dedicated physical test phone. Alpha authorization prompts,
+  policy/module/settings screens, cold boot, complete KSU lifecycle and
+  final device-class UI review remain release blockers. No stable release
+  is claimed at this checkpoint.

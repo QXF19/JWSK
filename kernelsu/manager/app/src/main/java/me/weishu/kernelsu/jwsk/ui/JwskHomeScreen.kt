@@ -39,10 +39,12 @@ fun JwskHomeScreen(
 ) {
     val colors = MiuixTheme.colorScheme
     val pageColor = if (me.weishu.kernelsu.ui.theme.isInDarkTheme()) colors.background else Color(0xFFDFEFF8)
-    val working = !state.detectionFailed && state.isManager && state.isRootAvailable &&
-        state.kernelUAPIVersion == state.managerUAPIVersion && !state.requiresNewKernel && !state.requiresNewManager
+    val working = !state.detectionFailed && (state.alphaManager || (state.isManager && state.isRootAvailable &&
+        state.kernelUAPIVersion == state.managerUAPIVersion && !state.requiresNewKernel && !state.requiresNewManager))
     val reason = when {
         state.detectionFailed -> R.string.jwsk_detection_failed
+        state.alphaManager -> R.string.jwsk_root_ready
+        state.alphaVersion != null -> R.string.jwsk_manager_unrecognized
         state.ksuVersion == null -> R.string.jwsk_kernel_unavailable
         !state.isManager -> R.string.jwsk_manager_unrecognized
         state.requiresNewKernel || state.requiresNewManager || state.kernelUAPIVersion != state.managerUAPIVersion -> R.string.jwsk_api_mismatch
@@ -111,7 +113,7 @@ fun JwskHomeScreen(
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text("Magisk Alpha", fontWeight = FontWeight.SemiBold)
-                            Text(stringResource(R.string.jwsk_unknown), fontSize = 14.sp, color = colors.onSurfaceVariantSummary)
+                            Text(state.alphaVersion ?: stringResource(R.string.jwsk_unknown), fontSize = 14.sp, color = colors.onSurfaceVariantSummary)
                         }
                     }
                 }
