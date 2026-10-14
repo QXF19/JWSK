@@ -1,0 +1,4 @@
+version=96221b69-alpha-jwsk
+versionCode=31000
+outdir=out
+abiList=armeabi-v7a,x86,arm64-v8a,x86_64

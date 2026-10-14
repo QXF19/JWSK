@@ -1,0 +1,10 @@
+diff --git a/native/src/include/consts.rs b/native/src/include/consts.rs
+--- a/native/src/include/consts.rs
++++ b/native/src/include/consts.rs
+@@ -11,5 +11,5 @@
+ pub use flags::*;
+ pub const MAGISK_FULL_VER: &str = concatcp!(MAGISK_VERSION, "(", MAGISK_VER_CODE, ")");
+ 
+-pub const APP_PACKAGE_NAME: &str = "com.topjohnwu.magisk";
++pub const APP_PACKAGE_NAME: &str = "cn.jiangwang.jwsk";
+ 
