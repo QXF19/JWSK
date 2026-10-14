@@ -54,7 +54,7 @@ jobs:
           sed -i -E 's/^([[:space:]]*)check_exports\(mod\);/\1\/\/ check_exports(mod);/' "$MODPOST"
           sed -i -E 's/^([[:space:]]*)s->module = exp->module;/\1\/\/ s->module = exp->module;/' "$MODPOST"
           sed -i 's/^static void check_exports(/static void __attribute__((unused)) check_exports(/' "$MODPOST"
-          sed -i 's/__version_ext_names\") =\\n/__version_ext_names\") = \"\"\\n/' "$MODPOST"
+          sed -i 's/__version_ext_names\\") =\\n/__version_ext_names\\") = \\"\\"\\n/' "$MODPOST"
           make O="$KDIR" gki_defconfig
           scripts/config --file "$KDIR/.config" -d LTO_CLANG -e LTO_NONE -d LTO_CLANG_THIN -d LTO_CLANG_FULL -d THINLTO
           if [[ "$KMI" == android16-6.12 || "$KMI" == android17-6.18 ]]; then
