@@ -28,6 +28,12 @@ The output contains `magisk`, `magiskinit`, `magiskboot`, `magiskpolicy` and
 source revision and local patches. It excludes Rust static libraries and caches.
 Native artifacts are development inputs, not an installable or boot-tested APK.
 
+Both 64-bit targets receive workspace compilation and strict Clippy checks.
+Formatting is checked on the modified `include/consts.rs`, with child traversal
+disabled: the pinned upstream and third-party submodules have pre-existing
+whole-workspace formatting differences under ONDK r30.1. Those unrelated files
+are preserved rather than silently reformatted or counted as JWSK changes.
+
 ## Manager contract still required
 
 Compiling the package identity alone does not implement a full Alpha manager.
