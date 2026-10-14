@@ -37,6 +37,15 @@ public final class KernelArtifactInspector {
 
     /** SHA-256 identifies the selected bytes; it is NOT a signature or compatibility check. */
     public static Inspection inspect(File file) throws IOException {
+        return inspectFile(file, false);
+    }
+
+    /** Boot-patch intake also accepts ramdisk-only init_boot, never raw kernel input. */
+    public static Inspection inspectBootImage(File file) throws IOException {
+        return inspectFile(file, true);
+    }
+
+    private static Inspection inspectFile(File file, boolean bootImageOnly) throws IOException {
         long size = file.length();
         if (size > MAX_BYTES) throw invalid(Problem.TOO_LARGE);
         if (size < 2) throw invalid(Problem.TRUNCATED);
@@ -60,7 +69,9 @@ public final class KernelArtifactInspector {
         }
         if (count != size) throw invalid(Problem.TRUNCATED);
         Header header;
-        if (prefix[0] == (byte) 0x1f && prefix[1] == (byte) 0x8b) {
+        if (bootImageOnly) {
+            header = inspectBootImageHeader(prefix, size);
+        } else if (prefix[0] == (byte) 0x1f && prefix[1] == (byte) 0x8b) {
             header = inspectGzip(file);
         } else {
             header = inspectHeader(prefix, size);
@@ -74,7 +85,7 @@ public final class KernelArtifactInspector {
         if (prefix.length > size || prefix.length < Math.min(64, size)) {
             throw invalid(Problem.TRUNCATED);
         }
-        if (matches(prefix, 0, BOOT_MAGIC)) return inspectBoot(prefix, size);
+        if (matches(prefix, 0, BOOT_MAGIC)) return inspectBoot(prefix, size, false);
         if (matches(prefix, 56, ARM64_MAGIC)) {
             long imageBytes = u64(prefix, 16);
             // Old arm64 headers may have image_size == 0. Do not invent that size.
@@ -86,11 +97,21 @@ public final class KernelArtifactInspector {
         throw invalid(Problem.UNSUPPORTED);
     }
 
-    private static Header inspectBoot(byte[] h, long size) throws IOException {
+    /** Format validation only; does not establish device compatibility or bootability. */
+    public static Header inspectBootImageHeader(byte[] prefix, long size) throws IOException {
+        checkSize(size);
+        if (prefix.length > size || prefix.length < Math.min(64, size)) throw invalid(Problem.TRUNCATED);
+        if (!matches(prefix, 0, BOOT_MAGIC)) throw invalid(Problem.UNSUPPORTED);
+        return inspectBoot(prefix, size, true);
+    }
+
+    private static Header inspectBoot(byte[] h, long size, boolean allowRamdiskOnly) throws IOException {
         long version = u32(h, 40);
         if (version > 4) throw invalid(Problem.UNSUPPORTED);
         long kernel = u32(h, 8);
-        if (kernel == 0) throw invalid(Problem.NO_KERNEL); // init_boot is not a compiled kernel.
+        if (kernel == 0 && (!allowRamdiskOnly || version < 3 || u32(h, 12) == 0)) {
+            throw invalid(Problem.NO_KERNEL); // GKI intake never treats init_boot as a compiled kernel.
+        }
         long page;
         long end;
         if (version >= 3) {

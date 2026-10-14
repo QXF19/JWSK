@@ -113,10 +113,12 @@ fun KernelSUTheme(
             content = content
         )
 
-        UiMode.Material -> MaterialKernelSUTheme(
-            appSettings = appSettings,
-            content = content
-        )
+        // Shared JWSK surfaces use Miuix controls in either navigation style.
+        // Supply both theme contexts so dark/dynamic colors do not fall back
+        // to the library defaults when Material is selected.
+        UiMode.Material -> MiuixKernelSUTheme(appSettings = appSettings) {
+            MaterialKernelSUTheme(appSettings = appSettings, content = content)
+        }
     }
 }
 

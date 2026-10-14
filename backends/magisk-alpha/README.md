@@ -38,8 +38,17 @@ are preserved rather than silently reformatted or counted as JWSK changes.
 
 Compiling the package identity alone does not implement a full Alpha manager.
 Before enabling this backend in a public release, JWSK must supply the matching
-signed manager payload, the APK version-comment protocol, validated superuser
+signed manager payload, validated superuser
 request handling, policy/module/settings operations and log management.
 The backend's certificate and client checks must not be disabled to bypass that
 work. Offline image patching must export a new image only after explicit user
 selection; it must not flash a partition automatically.
+
+`tools/AlphaApkSeal.java` implements the build-time APK version-comment contract.
+It edits a temporary copy before re-signing with the original JWSK identity,
+verifies v2 and v3 signatures and the resulting comment, and never overwrites
+the input APK. Signing credentials are read from environment variables or the
+ignored local signing properties, never passed as command-line arguments.
+The native manager workflow runs its ZIP boundary tests and seals the signed
+development output. That protocol is a prerequisite, not proof that the full
+Alpha manager or any patched image has been tested on a device.

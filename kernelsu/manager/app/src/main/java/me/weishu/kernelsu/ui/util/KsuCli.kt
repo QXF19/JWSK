@@ -82,6 +82,9 @@ fun Uri.getFileName(context: Context): String? {
 fun createRootShell(globalMnt: Boolean = false): Shell {
     Shell.enableVerboseLogging = BuildConfig.DEBUG
     val builder = Shell.Builder.create()
+    // Offline operations may use an ordinary app shell. Never ask another
+    // Root manager for authorization when this kernel does not trust JWSK.
+    if (!Natives.isManager) return builder.build("/system/bin/sh")
     return try {
         if (globalMnt) {
             builder.build(getKsuDaemonPath(), "debug", "su", "-g")
@@ -90,16 +93,7 @@ fun createRootShell(globalMnt: Boolean = false): Shell {
         }
     } catch (e: Throwable) {
         Log.w(TAG, "ksu failed: ", e)
-        try {
-            if (globalMnt) {
-                builder.build("su", "-mm")
-            } else {
-                builder.build("su")
-            }
-        } catch (e: Throwable) {
-            Log.e(TAG, "su failed: ", e)
-            builder.build("sh")
-        }
+        builder.build("/system/bin/sh")
     }
 }
 

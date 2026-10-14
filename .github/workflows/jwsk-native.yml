@@ -7,6 +7,8 @@ on:
     paths:
       - 'kernelsu/**'
       - '.github/workflows/jwsk-native.yml'
+      - 'tools/AlphaApkSeal.java'
+      - 'tools/AlphaApkSealTest.java'
 
 concurrency:
   group: jwsk-native-${{ github.ref }}
@@ -207,10 +209,26 @@ jobs:
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$apk" > release-certificate.txt
           grep -Fq '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' release-certificate.txt
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --min-sdk-version 24 --max-sdk-version 27 "$apk" | grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true'
+      - name: Seal and verify the Alpha manager APK protocol
+        working-directory: kernelsu/manager
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          apk=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          classes="$RUNNER_TEMP/alpha-seal-classes"
+          apksig="$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar"
+          mkdir -p "$classes" ../../native-manager
+          javac -encoding UTF-8 -cp "$apksig" -d "$classes" ../../tools/AlphaApkSeal.java ../../tools/AlphaApkSealTest.java
+          java -cp "$classes:$apksig" AlphaApkSealTest
+          java -cp "$classes:$apksig" AlphaApkSeal "$apk" ../../native-manager/JWSK_1.3.0-dev_5-development.apk
+          cp release-certificate.txt ../../native-manager/
+          cd ../../native-manager
+          sha256sum ./*.apk > SHA256SUMS
       - uses: actions/upload-artifact@v7
         with:
           name: JWSK-native-signed-development
-          path: |
-            kernelsu/manager/app/build/outputs/apk/release/*.apk
-            kernelsu/manager/release-certificate.txt
+          path: native-manager/
           if-no-files-found: error
