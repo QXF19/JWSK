@@ -35,12 +35,8 @@ jobs:
           KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEYSTORE_ALIAS" ] || [ -z "$KEYSTORE_ALIAS_PASSWORD" ]; then
-            if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-              echo "Release signing secrets are required for a tag build."
-              exit 1
-            fi
-            echo "Signing secrets are not configured; using debug signing fallback."
-            exit 0
+            echo "Release signing secrets are required. Debug-signed release artifacts are not allowed."
+            exit 1
           fi
           {
             printf 'KEYSTORE_PASSWORD=%s\n' "$KEYSTORE_PASSWORD"
@@ -49,24 +45,6 @@ jobs:
             printf 'KEYSTORE_FILE=../key.jks\n'
           } > signing.properties
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > key.jks
-      - name: Generate fallback signing key
-        if: hashFiles('signing.properties') == ''
-        run: |
-          keytool -genkeypair -noprompt \
-            -keystore ci-debug.keystore \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
-          {
-            printf 'KEYSTORE_PASSWORD=android\n'
-            printf 'KEYSTORE_ALIAS=androiddebugkey\n'
-            printf 'KEYSTORE_ALIAS_PASSWORD=android\n'
-            printf 'KEYSTORE_FILE=../ci-debug.keystore\n'
-          } > signing.properties
       - name: Setup Android SDK
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
@@ -96,6 +74,18 @@ jobs:
           test -n "$release_path"
           release_name=$(basename "$release_path" .apk)
           echo "releaseName=$release_name" >> "$GITHUB_OUTPUT"
+      - name: Verify release APK signing identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_path=$(find out/apk -maxdepth 1 -name 'JWSK-v*-release.apk' -print -quit)
+          test -n "$release_path"
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$release_path" | tee "$RUNNER_TEMP/jwsk-signature.txt"
+          grep -Fq 'certificate SHA-256 digest: 1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' "$RUNNER_TEMP/jwsk-signature.txt"
+          # Force a separate v2 check for KernelSU's APK identity reader.
+          # This verifier range does not change the application's minSdk.
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --min-sdk-version 24 --max-sdk-version 27 --verbose "$release_path" | tee "$RUNNER_TEMP/jwsk-signature-v2.txt"
+          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' "$RUNNER_TEMP/jwsk-signature-v2.txt"
       - name: Upload release
         if: success()
         uses: actions/upload-artifact@v6

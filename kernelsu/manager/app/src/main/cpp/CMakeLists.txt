@@ -1,0 +1,28 @@
+
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html
+
+# Sets the minimum version of CMake required to build the native library.
+cmake_minimum_required(VERSION 3.18.1)
+
+project("kernelsu")
+
+find_package(cxx REQUIRED CONFIG)
+link_libraries(cxx::cxx)
+
+add_library(kernelsu
+        SHARED
+        jni.cc
+        ksu.cc
+        )
+
+# Also resolve the shared UAPI directly when source archives materialize symlinks
+# as text files on Windows. This uses the same upstream headers, not a copy.
+target_include_directories(kernelsu PRIVATE . ${CMAKE_CURRENT_LIST_DIR}/../../../../..)
+
+find_library(log-lib log)
+
+target_link_libraries(kernelsu ${log-lib})
+
+add_library(adbroot SHARED adbroot.cc)
+target_link_libraries(adbroot ${log-lib})

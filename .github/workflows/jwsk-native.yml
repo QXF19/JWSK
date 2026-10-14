@@ -1,0 +1,213 @@
+name: JWSK native backend validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/ksu-native-manager]
+    paths:
+      - 'kernelsu/**'
+      - '.github/workflows/jwsk-native.yml'
+
+concurrency:
+  group: jwsk-native-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lkm:
+    name: LKM ${{ matrix.kmi }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kmi: [android12-5.10, android13-5.10, android13-5.15, android14-5.15, android14-6.1, android15-6.6, android16-6.12, android17-6.18]
+    container:
+      image: ghcr.io/ylarod/ddk-min:${{ matrix.kmi }}-20260828
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build LKM for the JWSK manager identity
+        shell: bash
+        env:
+          KMI: ${{ matrix.kmi }}
+        run: |
+          set -euo pipefail
+          source "$GITHUB_WORKSPACE/kernelsu/jwsk-kernel-identity.properties"
+          cd "$GITHUB_WORKSPACE/kernelsu/kernel"
+          args=("KSU_PACKAGE_NAME=$KSU_PACKAGE_NAME" "KSU_EXPECTED_SIZE=$KSU_EXPECTED_SIZE" "KSU_EXPECTED_HASH=$KSU_EXPECTED_HASH" "KSU_PINNED_VERSION=$KSU_PINNED_VERSION")
+          CONFIG_KSU=m CC=clang make "${args[@]}"
+          mkdir -p "$GITHUB_WORKSPACE/native-out/aarch64"
+          llvm-strip -d kernelsu.ko
+          grep -aFq "$KSU_PACKAGE_NAME" kernelsu.ko
+          grep -aFq "$KSU_EXPECTED_HASH" kernelsu.ko
+          cp kernelsu.ko "$GITHUB_WORKSPACE/native-out/aarch64/${KMI}_kernelsu.ko"
+
+          make clean
+          unset CROSS_COMPILE
+          export ARCH=x86_64
+          export KDIR="/opt/ddk/kdir-x64/$KMI"
+          mkdir -p "$KDIR"
+          pushd "/opt/ddk/src/$KMI"
+          MODPOST=scripts/mod/modpost.c
+          sed -i -E 's/^([[:space:]]*)check_exports\(mod\);/\1\/\/ check_exports(mod);/' "$MODPOST"
+          sed -i -E 's/^([[:space:]]*)s->module = exp->module;/\1\/\/ s->module = exp->module;/' "$MODPOST"
+          sed -i 's/^static void check_exports(/static void __attribute__((unused)) check_exports(/' "$MODPOST"
+          sed -i 's/__version_ext_names\") =\\n/__version_ext_names\") = \"\"\\n/' "$MODPOST"
+          make O="$KDIR" gki_defconfig
+          scripts/config --file "$KDIR/.config" -d LTO_CLANG -e LTO_NONE -d LTO_CLANG_THIN -d LTO_CLANG_FULL -d THINLTO
+          if [[ "$KMI" == android16-6.12 || "$KMI" == android17-6.18 ]]; then
+            scripts/config --file "$KDIR/.config" -e CONFIG_CFI_ICALL_NORMALIZE_INTEGERS
+          fi
+          make O="$KDIR" modules_prepare
+          make O="$KDIR" security/selinux/built-in.a
+          popd
+          MDIR="$PWD"
+          if [[ "$KMI" == android17-6.18 ]]; then
+            make -C "$KDIR" M="$MDIR" MO="$MDIR" modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y "${args[@]}"
+          else
+            make -C "$KDIR" M="$MDIR" src="$MDIR" modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y "${args[@]}"
+          fi
+          llvm-strip -d kernelsu.ko
+          grep -aFq "$KSU_PACKAGE_NAME" kernelsu.ko
+          grep -aFq "$KSU_EXPECTED_HASH" kernelsu.ko
+          mkdir -p "$GITHUB_WORKSPACE/native-out/x86_64"
+          cp kernelsu.ko "$GITHUB_WORKSPACE/native-out/x86_64/${KMI}_kernelsu.ko"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: jwsk-lkm-${{ matrix.kmi }}
+          path: native-out/
+          if-no-files-found: error
+
+  ksud:
+    needs: lkm
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-linux-android
+            arch: aarch64
+            abi: arm64-v8a
+          - target: x86_64-linux-android
+            arch: x86_64
+            abi: x86_64
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: jwsk-lkm-*
+          path: native-out
+          merge-multiple: true
+      - name: Prepare Rust and Android NDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt
+          rustup default 1.97.1
+          rustup target add aarch64-linux-android x86_64-linux-android
+          cargo install cargo-ndk --version 4.1.2 --locked
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'ndk;29.0.14206865'
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/29.0.14206865" >> "$GITHUB_ENV"
+      - name: Build matching ksuinit and package LKM artifacts
+        shell: bash
+        env:
+          TRIPLE: ${{ matrix.target }}
+          ARCH_NAME: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          cp native-out/aarch64/*_kernelsu.ko kernelsu/userspace/ksud/bin/aarch64/
+          cp native-out/x86_64/*_kernelsu.ko kernelsu/userspace/ksud/bin/x86_64/
+          cd kernelsu
+          source .github/scripts/setup-rust-build.sh "$TRIPLE" 26
+          BUILTINS="$($CLANG_PATH --print-resource-dir)/lib/linux/libclang_rt.builtins-${ARCH_NAME}-android.a"
+          test -f "$BUILTINS"
+          RUSTFLAGS="-C target-feature=+crt-static -C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wno-unused-command-line-argument -C link-arg=$BUILTINS" cargo build --locked --package ksuinit --target="$TRIPLE" --release
+          cp "target/$TRIPLE/release/ksuinit" "userspace/ksud/bin/$ARCH_NAME/ksuinit"
+      - name: Check, lint and format Rust in the required order
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd kernelsu
+          source .github/scripts/setup-rust-build.sh aarch64-linux-android 26
+          cargo ndk -t arm64-v8a -p 26 check --locked -p ksud
+          cargo ndk -t arm64-v8a -p 26 clippy --locked -p ksud -- -D warnings
+          cargo fmt --all
+          git diff --exit-code -- userspace
+      - name: Build ksud with the JWSK package and pinned backend version
+        shell: bash
+        env:
+          TRIPLE: ${{ matrix.target }}
+          ABI: ${{ matrix.abi }}
+        run: |
+          set -euo pipefail
+          set -a
+          source kernelsu/jwsk-kernel-identity.properties
+          set +a
+          cd kernelsu
+          source .github/scripts/setup-rust-build.sh "$TRIPLE" 26
+          cargo build --locked --target "$TRIPLE" --release -p ksud
+          mkdir -p "../native-daemon/$ABI"
+          cp "target/$TRIPLE/release/ksud" "../native-daemon/$ABI/libksud.so"
+          sha256sum "../native-daemon/$ABI/libksud.so"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: jwsk-ksud-${{ matrix.abi }}
+          path: native-daemon/
+          if-no-files-found: error
+
+  manager:
+    needs: ksud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: jwsk-ksud-*
+          path: kernelsu/manager/app/src/main/jniLibs
+          merge-multiple: true
+      - name: Prepare SDK and release signing identity
+        env:
+          RELEASE_KEY: ${{ secrets.KEYSTORE }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_KEY"
+          printf '%s' "$RELEASE_KEY" | base64 --decode > "$RUNNER_TEMP/jwsk-release.jks"
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/jwsk-release.jks" >> "$GITHUB_ENV"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;29.0.14206865' 'cmake;3.22.1'
+      - name: Build and test the signed development manager
+        working-directory: kernelsu/manager
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/assets
+          {
+            cat ../jwsk-kernel-identity.properties
+            printf '\nKSU_SOURCE_COMMIT=0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d\n'
+            for abi in arm64-v8a x86_64; do
+              digest=$(sha256sum "app/src/main/jniLibs/$abi/libksud.so" | cut -d ' ' -f 1)
+              printf 'KSUD_SHA256_%s=%s\n' "$abi" "$digest"
+            done
+          } > app/src/main/assets/jwsk_backend.properties
+          chmod +x gradlew
+          ./gradlew clean :app:testDebugUnitTest :app:assembleRelease --console=plain
+          apk=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          test -n "$apk"
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$apk" > release-certificate.txt
+          grep -Fq '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' release-certificate.txt
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --min-sdk-version 24 --max-sdk-version 27 "$apk" | grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: JWSK-native-signed-development
+          path: |
+            kernelsu/manager/app/build/outputs/apk/release/*.apk
+            kernelsu/manager/release-certificate.txt
+          if-no-files-found: error
