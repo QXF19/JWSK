@@ -48,6 +48,9 @@ jobs:
           assert evidence['version'] == version and evidence['status'] == 'passed'
           assert set(evidence['root_backends']) == {'alpha', 'kernelsu'}
           assert evidence['alpha_cold_boot'] is True
+          assert evidence['kernelsu_runtime'] is True
+          assert evidence['kernelsu_cold_boot'] is True
+          assert evidence['isolated_uid_grant_revoke'] == {'alpha': True, 'kernelsu': True}
           assert evidence['signing_sha256'] == '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f'
           assert pathlib.Path(f'docs/release-notes-{tag}.md').is_file()
           PY
@@ -85,8 +88,14 @@ jobs:
           signer="$ANDROID_HOME/build-tools/37.0.0/apksigner"
           apk_version=$("$ANDROID_HOME/build-tools/37.0.0/aapt2" dump badging "${apks[0]}" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
           test "$apk_version" = "${RELEASE_TAG#v}"
+          if "$ANDROID_HOME/build-tools/37.0.0/aapt2" dump badging "${apks[0]}" | grep -q '^application-debuggable'; then
+            echo 'Refusing a debuggable public release' >&2
+            exit 1
+          fi
           "$signer" verify --verbose --print-certs "${apks[0]}" > signed-manager/certificate.txt
           grep -Fq '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' signed-manager/certificate.txt
+          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' signed-manager/certificate.txt
+          grep -Fq 'Verified using v3 scheme (APK Signature Scheme v3): false' signed-manager/certificate.txt
           "$signer" verify --min-sdk-version 24 --max-sdk-version 27 --verbose "${apks[0]}" | grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true'
           mkdir -p release
           cp "${apks[0]}" "release/JWSK-$RELEASE_TAG.apk"

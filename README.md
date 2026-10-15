@@ -27,6 +27,12 @@ Miuix 原生控件与可关闭的液态玻璃效果，保留 furry 主题、Comp
 
 ## 一套清晰的入口
 
+以下是实际运行的原生界面截图，不是设计稿：
+
+<img src=".impeccable/review/phone-home.png" width="250" alt="JWSK 主页实际截图" /> <img src=".impeccable/review/phone-superuser.png" width="250" alt="超级用户实际截图" /> <img src=".impeccable/review/phone-tools.png" width="250" alt="工具页实际截图" />
+
+截图来自 Android 14 模拟器，应用与授权状态均取实际数据；不代表所有厂商设备验证。
+
 底部保留四个页面：
 
 - **主页**：真实的“工作 / 不工作”状态、原因和内核信息。
