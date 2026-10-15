@@ -215,10 +215,9 @@ static long my_x64_sys_call(const struct pt_regs *regs, unsigned int nr)
     return ksu_syscall_table[nr](regs);
 }
 
-// avd 13-5.15 missing this commit:
+// Older AVD kernels (including Android 14's 6.1.23) can miss this commit:
 // https://github.com/torvalds/linux/commit/fb13b11d53875e28e7fbf0c26b288e4ea676aa9f
 // we need to patch the whole do_syscall_64
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
 static void *do_syscall_64_patch_addr;
 static char do_syscall_64_orig_insn[14];
 
@@ -255,7 +254,6 @@ static void __nocfi my_do_syscall_64(struct pt_regs *regs, int nr)
 
     syscall_exit_to_user_mode_fn(regs);
 }
-#endif
 #endif
 
 static void patch_abs_jump(const char *sym, void **patch_addr, void *target, char backup[14])
@@ -306,15 +304,20 @@ void __init __nocfi ksu_syscall_hook_init(void)
 
 #ifdef CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER
     patch_abs_jump("x64_sys_call", &x64_sys_call_patch_addr, my_x64_sys_call, x64_sys_call_patch_orig_insn);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
-    syscall_enter_from_user_mode_fn = find_kernel_symbol_exact("syscall_enter_from_user_mode");
-    syscall_exit_to_user_mode_fn = find_kernel_symbol_exact("syscall_exit_to_user_mode");
-    pr_info("syscall_enter_from_user_mode: 0x%lx, syscall_exit_to_user_mode: 0x%lx\n",
-            (unsigned long)syscall_enter_from_user_mode_fn, (unsigned long)syscall_exit_to_user_mode_fn);
-    if (syscall_enter_from_user_mode_fn && syscall_exit_to_user_mode_fn) {
-        patch_abs_jump("do_syscall_64", &do_syscall_64_patch_addr, my_do_syscall_64, do_syscall_64_orig_insn);
+    // Version numbers do not identify backported syscall-entry behavior. When
+    // x64_sys_call is absent, old entry code keeps its pre-tracepoint nr local
+    // instead of re-reading orig_ax. Preserve the existing legacy workaround,
+    // but select it by the actual symbols rather than a 5.16 version cutoff.
+    // The replacement handles x64 only; never install it on an x32 kernel.
+    if (!x64_sys_call_patch_addr && !IS_ENABLED(CONFIG_X86_X32_ABI)) {
+        syscall_enter_from_user_mode_fn = find_kernel_symbol_exact("syscall_enter_from_user_mode");
+        syscall_exit_to_user_mode_fn = find_kernel_symbol_exact("syscall_exit_to_user_mode");
+        pr_info("syscall_enter_from_user_mode: 0x%lx, syscall_exit_to_user_mode: 0x%lx\n",
+                (unsigned long)syscall_enter_from_user_mode_fn, (unsigned long)syscall_exit_to_user_mode_fn);
+        if (syscall_enter_from_user_mode_fn && syscall_exit_to_user_mode_fn) {
+            patch_abs_jump("do_syscall_64", &do_syscall_64_patch_addr, my_do_syscall_64, do_syscall_64_orig_insn);
+        }
     }
-#endif
 #endif
 
     // Find one ni_syscall slot for the dispatcher
@@ -342,7 +345,6 @@ void __exit ksu_syscall_hook_exit(void)
         }
     }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
     if (do_syscall_64_patch_addr) {
         ret = ksu_patch_text((void *)do_syscall_64_patch_addr, do_syscall_64_orig_insn, sizeof(do_syscall_64_orig_insn),
                              KSU_PATCH_TEXT_FLUSH_ICACHE);
@@ -350,7 +352,6 @@ void __exit ksu_syscall_hook_exit(void)
             pr_err("restore x64_sys_call err: %d\n", ret);
         }
     }
-#endif
 #endif
 
     if (!ksu_syscall_table)

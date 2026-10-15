@@ -277,7 +277,10 @@ jobs:
           java -cp "$classes:$apksig" AlphaApkSealTest
           sealed="../../native-manager/$(basename "$apk" -release.apk)-signed.apk"
           java -cp "$classes:$apksig" AlphaApkSeal "$apk" "$sealed"
-          cp release-certificate.txt ../../native-manager/
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$sealed" > ../../native-manager/release-certificate.txt
+          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' ../../native-manager/release-certificate.txt
+          grep -Fq 'Verified using v3 scheme (APK Signature Scheme v3): false' ../../native-manager/release-certificate.txt
+          "$ANDROID_HOME/build-tools/37.0.0/zipalign" -c -P 16 4 "$sealed"
           cd ../../native-manager
           sha256sum ./*.apk > SHA256SUMS
       - uses: actions/upload-artifact@v7

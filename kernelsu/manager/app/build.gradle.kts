@@ -250,7 +250,9 @@ android {
         versionCode = managerVersionCode
         versionName = managerVersionName
         applicationId = managerPackageName
-        testInstrumentationRunner = "me.weishu.kernelsu.jwsk.alpha.AlphaRuntimeInstrumentation"
+        testInstrumentationRunner = if (providers.gradleProperty("JWSK_KSU_RUNTIME_TEST").orNull == "true")
+            "me.weishu.kernelsu.jwsk.KsuRuntimeInstrumentation"
+        else "me.weishu.kernelsu.jwsk.alpha.AlphaRuntimeInstrumentation"
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
         // Backend identity must not be compared with JWSK's independent APK version.

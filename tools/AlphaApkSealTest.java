@@ -39,6 +39,16 @@ public final class AlphaApkSealTest {
                 AlphaApkSeal.verifyPackagedBackends(zip);
                 throw new AssertionError("Missing backend receipts accepted");
             } catch (SecurityException expected) { }
+            for (int[] ids : new int[][] {
+                {0x7109871a, 0x42726577}, {0x7109871a, 0xf05368c0},
+                {0x7109871a, 0x7109871a}, {0x42726577}
+            }) {
+                signingFixture(zip, bad, ids);
+                boolean rejected = false;
+                try { AlphaApkSeal.verifyKernelSuFormat(bad); }
+                catch (SecurityException expected) { rejected = true; }
+                check(rejected == !(ids.length == 2 && ids[1] == 0x42726577));
+            }
             // A fake EOCD signature inside a comment must not confuse the scanner.
             byte[] nested = new byte[]{0x50, 0x4b, 0x05, 0x06, 4, 3, 2, 1};
             AlphaApkSeal.replaceComment(zip, nested);
@@ -74,12 +84,30 @@ public final class AlphaApkSealTest {
                 AlphaApkSeal.verifyBootstrapShape(bad);
                 throw new AssertionError("Executable bootstrap accepted");
             } catch (SecurityException expected) { }
-            System.out.println("Alpha APK comment, bootstrap and artifact tests passed (13 cases)");
+            System.out.println("Alpha APK comment, bootstrap, artifact and KernelSU signing tests passed (17 cases)");
         } finally {
             Files.deleteIfExists(zip);
             Files.deleteIfExists(bad);
             Files.deleteIfExists(directory);
         }
+    }
+
+    private static void signingFixture(Path source, Path target, int[] ids) throws Exception {
+        byte[] original = Files.readAllBytes(source);
+        int end;
+        try (var file = new java.io.RandomAccessFile(source.toFile(), "r")) {
+            end = Math.toIntExact(AlphaApkSeal.eocd(file));
+        }
+        var input = java.nio.ByteBuffer.wrap(original).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        int central = input.getInt(end + 16);
+        int blockLength = 32 + ids.length * 12;
+        var output = java.nio.ByteBuffer.allocate(original.length + blockLength).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+        output.put(original, 0, central).putLong(blockLength - 8);
+        for (int id : ids) output.putLong(4).putInt(id);
+        output.putLong(blockLength - 8).put("APK Sig Block 42".getBytes(StandardCharsets.US_ASCII));
+        output.put(original, central, original.length - central);
+        output.putInt(end + blockLength + 16, central + blockLength);
+        Files.write(target, output.array());
     }
 
     private static void check(boolean condition) {

@@ -27,7 +27,7 @@ public final class AlphaApkSeal {
             if (args.length != 2 && !bootstrap) throw new IllegalArgumentException("Expected input and new output APK paths");
             int offset = bootstrap ? 1 : 0;
             seal(Path.of(args[offset]).toAbsolutePath().normalize(), Path.of(args[offset + 1]).toAbsolutePath().normalize(), bootstrap);
-            System.out.println("Alpha manager protocol and original JWSK v2/v3 signing identity verified");
+            System.out.println("Alpha protocol, KernelSU v2-only format and original JWSK signing identity verified");
         } catch (Exception error) {
             // Signing providers can include their arguments in exception messages.
             // Do not dump exceptions or credentials into CI logs.
@@ -80,10 +80,13 @@ public final class AlphaApkSeal {
             new ApkSigner.Builder(List.of(signer))
                 .setInputApk(prepared.toFile()).setOutputApk(signed.toFile())
                 .setMinSdkVersion(34).setV1SigningEnabled(true).setV2SigningEnabled(true)
-                .setV3SigningEnabled(true).setV4SigningEnabled(false)
+                // The pinned KernelSU verifier rejects every extra signing-block ID,
+                // including v3. Android 14+ and Alpha both verify this v2 signature.
+                .setV3SigningEnabled(false).setV4SigningEnabled(false)
                 .setAlignmentPreserved(true).setLibraryPageAlignmentBytes(16384)
                 .setOtherSignersSignaturesPreserved(false).build().sign();
             verify(signed);
+            verifyKernelSuFormat(signed);
             if (!bootstrap) verifyPackagedBackends(signed);
             if (!Arrays.equals(readComment(signed), COMMENT)) throw new SecurityException("Protocol comment changed");
             Files.move(signed, output); // Never replace an existing artifact or the input APK.
@@ -222,11 +225,42 @@ public final class AlphaApkSeal {
         var current = new ApkVerifier.Builder(apk.toFile()).setMinCheckedPlatformVersion(34)
             .setMaxCheckedPlatformVersion(36).build().verify();
         if (!v2.isVerified() || !v2.isVerifiedUsingV2Scheme() || !current.isVerified()
-            || !current.isVerifiedUsingV3Scheme() || v2.getSignerCertificates().size() != 1
+            || (!current.isVerifiedUsingV2Scheme() && !current.isVerifiedUsingV3Scheme())
+            || v2.getSignerCertificates().size() != 1
             || current.getSignerCertificates().size() != 1
             || !fingerprint(v2.getSignerCertificates().getFirst()).equals(CERTIFICATE)
             || !fingerprint(current.getSignerCertificates().getFirst()).equals(CERTIFICATE)) {
             throw new SecurityException("APK signature validation failed");
+        }
+    }
+
+    /** Mirror the pinned kernel's allowlist; do not relax its identity verifier. */
+    static void verifyKernelSuFormat(Path apk) throws Exception {
+        try (var file = new RandomAccessFile(apk.toFile(), "r")) {
+            long end = eocd(file);
+            file.seek(end + 16);
+            long central = Integer.toUnsignedLong(Integer.reverseBytes(file.readInt()));
+            if (central < 32) throw new SecurityException("Missing APK signing block");
+            file.seek(central - 24);
+            long size = Long.reverseBytes(file.readLong());
+            byte[] magic = new byte[16]; file.readFully(magic);
+            if (!Arrays.equals(magic, "APK Sig Block 42".getBytes(StandardCharsets.US_ASCII))
+                || size < 24 || size > central - 8) throw new SecurityException("Invalid signing block");
+            long start = central - size - 8;
+            file.seek(start);
+            if (Long.reverseBytes(file.readLong()) != size) throw new SecurityException("Signing block size mismatch");
+            int count = 0;
+            while (file.getFilePointer() < central - 24) {
+                if (central - 24 - file.getFilePointer() < 8) throw new SecurityException("Truncated signing pair");
+                long length = Long.reverseBytes(file.readLong());
+                if (length < 4 || length > central - 24 - file.getFilePointer()) throw new SecurityException("Invalid signing pair");
+                long next = file.getFilePointer() + length;
+                int id = Integer.reverseBytes(file.readInt());
+                if (id == 0x7109871a) count++;
+                else if (id != 0x42726577) throw new SecurityException("KernelSU-incompatible signing block");
+                file.seek(next);
+            }
+            if (count != 1) throw new SecurityException("Exactly one v2 block required");
         }
     }
 

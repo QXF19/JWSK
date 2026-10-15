@@ -10,6 +10,17 @@ Preserve upstream licenses, notices and manager/kernel/userspace interfaces.
 Original source is copied as a new directory; the previous JWSK manager is preserved.
 Importing source does not mean the migration or device verification is complete.
 
+Current compatibility corrections (2026-10-15):
+- Final APK sealing emits the original-certificate v2 signature without v3
+  signing-block IDs, as required by this pinned KernelSU identity parser.
+  Android 14-16 APK verification and Alpha's v2 protocol are still checked.
+- The opt-in x86 dispatcher workaround selects the existing legacy entry
+  replacement by actual symbol availability, not a 5.16 version cutoff.
+  The captured Android 14 6.1.23 source lacks the post-tracepoint syscall-number
+  reread (Linux fb13b11d5387); x64_sys_call is absent at runtime. x32 kernels
+  never receive the x64-only fallback. No signature/CRC/vermagic check changes.
+  Rebuilt runtime validation remains pending; this is not a passed-device claim.
+
 Plan:
 1. Verify the unchanged manager/native baseline with matching ksud dependencies.
 2. Preserve upstream module, superuser and settings implementations.

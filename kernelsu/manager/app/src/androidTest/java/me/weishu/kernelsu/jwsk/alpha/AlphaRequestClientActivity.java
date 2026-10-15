@@ -18,7 +18,10 @@ public final class AlphaRequestClientActivity extends Activity {
             String result;
             Process process = null;
             try {
-                process = new ProcessBuilder("/debug_ramdisk/magisk", "su", "-c", "id -u").redirectErrorStream(true).start();
+                ProcessBuilder request = "ksu".equals(getIntent().getStringExtra("backend"))
+                    ? new ProcessBuilder("/system/bin/su", "-c", "id -u")
+                    : new ProcessBuilder("/debug_ramdisk/magisk", "su", "-c", "id -u");
+                process = request.redirectErrorStream(true).start();
                 if (!process.waitFor(75000, TimeUnit.MILLISECONDS)) throw new IllegalStateException("Root request timed out");
                 result = "exit=" + process.exitValue() + "\n" + new String(process.getInputStream().readNBytes(4096), StandardCharsets.UTF_8);
             } catch (Exception failure) { result = failure.getClass().getSimpleName(); }
