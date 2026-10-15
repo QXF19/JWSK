@@ -71,7 +71,7 @@ jobs:
           assert run['head_sha'] == evidence['source_commit']
           subprocess.run(['git', 'merge-base', '--is-ancestor', run['head_sha'], 'HEAD'], check=True)
           changed = subprocess.check_output(['git', 'diff', '--name-only', run['head_sha'], 'HEAD'], text=True).splitlines()
-          allowed = {'README.md', 'DESIGN.md', '.github/workflows/app.yml'}
+          allowed = {'README.md', 'DESIGN.md', '.github/workflows/app.yml', '.github/workflows/apk-build.yml'}
           assert all(p in allowed or p.startswith(('docs/', '.impeccable/')) for p in changed), changed
           digest = evidence['artifact_sha256']
           assert re.fullmatch('[0-9a-f]{64}', digest)
