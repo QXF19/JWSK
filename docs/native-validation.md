@@ -1,5 +1,39 @@
 # Native manager validation checkpoint
 
+## 2026-10-15: Final UI and exact-target KSU checkpoint
+
+This supersedes the older UI/signing status below. Still not a stable-release approval.
+
+- Native source and glass-material corrections uploaded at development commit
+  e7ba451ec7093b470db583041b68196b4fcc2d34. Phone/light/dark/1.3-font and expanded
+  screenshots were independently reopened. The final verdict scores three named
+  fixes resolved; it does not certify untouched backend code or hardware smoothness.
+- DESIGN.md and .impeccable/design.json extract the actual Compose/Miuix system.
+  All six shipping raster files in the plate/native-artwork directories carry
+  source or full generation-prompt metadata. The original character is retained.
+- The legacy web-only finish command still refuses its historical unfinished
+  hero phases. No gate was forced. The operative native evidence record explicitly
+  distinguishes unsupported web metrics from actual native review evidence.
+- Exact-target CI 38685619675 produced a module whose config, compiler, module
+  layout, CRC and release all match the dedicated Android 14 6.1.23 AVD. Its
+  SHA-256 is 08d2c3577b14e27e26b25c0cc47aff4d5befffcd92f66026f6291e01507738d9.
+  Own ksud loaded it normally; SELinux stayed Enforcing, without allow_shell,
+  debug manager overrides, CRC stripping or vermagic changes.
+- Runtime caught the pinned KernelSU parser rejecting v3 signing-block IDs even
+  after the correct original certificate matched. Sealing now emits v2-only and
+  verifies the signing-block allowlist plus Android 14-16 acceptance. The sealed
+  APK was recognized by the kernel as manager UID 10193 with the original cert.
+  APK protocol/format tests now pass 17 cases. CI verifies the final sealed APK,
+  not the pre-seal certificate report.
+- Application-UID checks still fail because this AVD's 6.1.23 syscall entry keeps
+  its pre-tracepoint syscall number. Observed x64_sys_call=0 and the immutable
+  target kernel source confirm the missing post-tracepoint reread. The existing
+  upstream legacy-entry workaround is now selected by actual symbol presence,
+  with an x32 exclusion. Source uploaded at 21e601f0a8c1549edecdac5c537d283f848afe6a;
+  exact-target rerun 38701078282 must pass and run before any functional claim.
+- Stable publication, actual KSU authorization/module lifecycle and KSU restart
+  validation remain open. No physical device is available; no OEM-wide claim.
+
 ## 2026-10-15: Cold-boot Alpha and application identities
 
 The following supersedes the older Alpha limitations below. This remains a
