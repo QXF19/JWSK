@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ runner.temp }}/jwsk-api34-prepared-cache
-          key: api34-exact-7e35917775b8-eed2fff8b93c-ubuntu22-v1-${{ hashFiles('tools/emulator-kernel/emulator-api34.config') }}
+          key: api34-exact-7e35917775b8-eed2fff8b93c-ubuntu22-v2-${{ hashFiles('tools/emulator-kernel/emulator-api34.config') }}
       - name: Build against the captured target without disabling kernel checks
         id: kernel
         shell: bash

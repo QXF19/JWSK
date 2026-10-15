@@ -54,7 +54,9 @@ and no prefix fallback. It whitelists only `.config`, Makefile, Module.symvers,
 vmlinux, System.map, generated include/scripts, x86 generated headers and SELinux
 build products. It never includes `certs/` or the entire output tree, and refuses
 private-key filenames or PEM markers before marking the cache ready. The
-reference `virtio_net.ko` must pass the target layout/CRC/version gate first.
+reference `net/rfkill/rfkill.ko` must pass the target layout/CRC/version gate first.
+The captured configuration builds RFKILL as a module and disables VIRTIO_NET;
+the validation must not assume an unconfigured driver was built.
 Cache reuse rechecks this reference, the full configuration and UTS_RELEASE;
 KSU is always freshly compiled and gated. Later KSU failures can therefore reuse
 the validated public kernel products without caching any signing secret. A new

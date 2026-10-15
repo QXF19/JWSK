@@ -35,14 +35,14 @@ grep -Fq 'clang version 17.0.0' "$work/artifacts/clang-version.txt"
 sha256sum "$work/clang.tar.gz" > "$work/artifacts/toolchain-archive.sha256"
 
 cache_hit=false
-if [[ -f "$cache/ready-v1" ]]; then
+if [[ -f "$cache/ready-v2" ]]; then
     test "$(cat "$cache/kernel-commit")" = "$kernel_commit"
     test "$(cat "$cache/clang-commit")" = "$clang_commit"
     # Cache inputs are fixed and the cached config, compile-time release and
     # reference driver's actual CRC/layout must all pass before reuse.
     python3 "$verify" config "$config" "$cache/out/.config"
     python3 "$verify" release-header "$cache/out/include/generated/utsrelease.h"
-    python3 "$verify" module "$cache/reference-virtio_net.ko"
+    python3 "$verify" module "$cache/reference-rfkill.ko"
     cp -a "$cache/out/." "$work/out/"
     cache_hit=true
 else
@@ -72,7 +72,9 @@ python3 "$verify" config "$config" "$work/out/.config"
 if [[ "$cache_hit" != true ]]; then
     # Whitelist only public build products needed by external Kbuild. Never
     # cache certs/, source signing keys, full out/, or the private .pem files.
-    python3 "$verify" module "$work/out/drivers/net/virtio_net.ko"
+    # The captured target has CONFIG_RFKILL=m and CONFIG_VIRTIO_NET disabled.
+    # Validate a module actually produced by this unmodified configuration.
+    python3 "$verify" module "$work/out/net/rfkill/rfkill.ko"
     test ! -e "$cache"
     mkdir -p "$cache/out/arch/x86" "$cache/out/security"
     for file in .config Makefile Module.symvers vmlinux System.map; do
@@ -81,7 +83,7 @@ if [[ "$cache_hit" != true ]]; then
     cp -a "$work/out/include" "$work/out/scripts" "$cache/out/"
     cp -a "$work/out/arch/x86/include" "$cache/out/arch/x86/"
     cp -a "$work/out/security/selinux" "$cache/out/security/"
-    cp "$work/out/drivers/net/virtio_net.ko" "$cache/reference-virtio_net.ko"
+    cp "$work/out/net/rfkill/rfkill.ko" "$cache/reference-rfkill.ko"
     test -z "$(find "$cache" -type f \( -name '*.pem' -o -name '*.key' -o -name '*.p12' -o -name '*.pfx' \) -print -quit)"
     if grep -rIlE -- '-----BEGIN ([A-Z0-9]+ )*PRIVATE KEY-----' "$cache"; then
         printf 'Refusing to cache private key material\n' >&2
@@ -89,7 +91,7 @@ if [[ "$cache_hit" != true ]]; then
     fi
     printf '%s\n' "$kernel_commit" > "$cache/kernel-commit"
     printf '%s\n' "$clang_commit" > "$cache/clang-commit"
-    touch "$cache/ready-v1"
+    touch "$cache/ready-v2"
 fi
 # Save a validated prepared kernel even if a later KSU compilation fails.
 printf 'cache_ready=true\n' >> "$GITHUB_OUTPUT"
