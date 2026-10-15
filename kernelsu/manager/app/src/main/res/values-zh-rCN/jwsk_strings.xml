@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="jwsk_ai_summary">聊天、命令推荐与测试建议</string>
+    <string name="jwsk_comput_title">Comput 命令终端</string>
+    <string name="jwsk_comput_manual_summary">手动输入与执行命令</string>
+    <string name="jwsk_logs_title">日志管理</string>
+    <string name="jwsk_logs_summary">查看、复制与导出</string>
     <string name="jwsk_alpha_access_granted">已允许 %1$s 获取 Root 权限</string>
     <string name="jwsk_alpha_access_denied">已拒绝 %1$s 获取 Root 权限</string>
     <string name="jwsk_alpha_more">更多选项</string>

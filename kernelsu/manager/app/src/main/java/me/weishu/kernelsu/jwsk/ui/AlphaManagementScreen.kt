@@ -71,7 +71,7 @@ internal fun AlphaManagementScreen(section: AlphaSection, bottomPadding: Dp = 0.
                                 enabled = !state.loading && !module.remove,
                                 onCheckedChange = { model.module(module.id, "disable", !it) })
                             Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text(module.description)
+                                Text(module.description, maxLines = Int.MAX_VALUE)
                                 if(module.updated) Text(stringResource(R.string.jwsk_alpha_reboot_required))
                                 TextButton(text = stringResource(if(module.remove) R.string.jwsk_alpha_undo_remove else R.string.jwsk_alpha_remove),
                                     enabled = !state.loading && !module.updated,
@@ -113,7 +113,7 @@ internal fun AlphaManagementScreen(section: AlphaSection, bottomPadding: Dp = 0.
                     item { TextButton(text = stringResource(R.string.jwsk_alpha_add_target), enabled = !state.loading && denyPackage.isNotBlank(),
                         onClick = { model.denyTarget(denyPackage.trim(), denyProcess.trim(), true) }) }
                     items(state.denyTargets, key = { "${it.first}|${it.second}" }) { target ->
-                        Column { Text("${target.first}\n${target.second}")
+                        Column { Text("${target.first}\n${target.second}", maxLines = Int.MAX_VALUE)
                             TextButton(text = stringResource(R.string.jwsk_alpha_remove_target), enabled = !state.loading,
                                 onClick = { model.denyTarget(target.first, target.second, false) }) }
                     }
@@ -125,7 +125,7 @@ internal fun AlphaManagementScreen(section: AlphaSection, bottomPadding: Dp = 0.
                     if (state.text.isBlank()) item { Text(stringResource(R.string.jwsk_alpha_no_logs)) }
                 }
             }
-            if (state.text.isNotBlank()) item { SelectionContainer { Text(state.text) } }
+            if (state.text.isNotBlank()) item { SelectionContainer { Text(state.text, maxLines = Int.MAX_VALUE) } }
         }
     }
 }

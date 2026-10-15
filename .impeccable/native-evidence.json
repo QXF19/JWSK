@@ -1,0 +1,45 @@
+{
+  "platform": "android",
+  "operative": true,
+  "supersedesHistoricalRecord": "build/state.json",
+  "artifact": "kernelsu/manager/app/src/main/java/me/weishu/kernelsu/ui/MainActivity.kt",
+  "sources": [
+    "kernelsu/manager/app/src/main/java/me/weishu/kernelsu/jwsk/ui/JwskHomeScreen.kt",
+    "kernelsu/manager/app/src/main/java/me/weishu/kernelsu/jwsk/ui/ToolsScreens.kt",
+    "kernelsu/manager/app/src/main/java/me/weishu/kernelsu/jwsk/ui/JwskGlassLayout.kt",
+    "kernelsu/manager/app/src/main/java/me/weishu/kernelsu/jwsk/ui/AlphaSuperUserScreen.kt"
+  ],
+  "approvedComps": ["mocks/home-unique.png", "mocks/tools-unique.png"],
+  "initialReview": {"disposition": "rebuild", "path": "review/finish-review.md"},
+  "rebuildReview": {"disposition": "fix", "path": "review/finish-rebuild-review.md", "verdictPass": "review/finish-verdict.md", "verdict": "ship; all three scored fixes resolved, not a full release approval"},
+  "nativePhaseEvidence": {
+    "comps": "User-approved sidecars for Home/Tools; SU user-provided native screenshot is its authority",
+    "spec": "Current native inventory and adaptation comparison in finish-rebuild-review.md; no numeric web measurement asserted",
+    "plates": "Original character retained. Additional clean lower-field raster generated from approved reference; full prompt embedded and copied byte-identically to native resource",
+    "hero": "Valid native phone captures independently reviewed; targeted material/status-bar corrections scored resolved",
+    "sections": "Native Home/Tools/SU/policy source and captures reviewed; no claim that screenshots certify untouched upstream modules/profiles",
+    "motion": "Native framework implementation; still captures do not establish hardware smoothness or animation behavior",
+    "responsive": "Phone/light/dark/1.3-font and expanded wm captures independently validated; no physical-device coverage",
+    "review": "First full review rebuild; fresh full rebuild review fix; final three-item verdict ship, all three resolved at that scope; DESIGN.md and design.json extracted from actual native implementation"
+  },
+  "assets": [{
+    "region": "lower-field artwork",
+    "file": "assets/plates/furry-field.png",
+    "androidResource": "kernelsu/manager/app/src/main/res/drawable-nodpi/jwsk_furry_field.png",
+    "prompt": "build/background-field-prompt.txt",
+    "reference": "mocks/home-unique.png",
+    "dimensions": "887x1774",
+    "generator": "built-in image generation; no rasterized UI or character replacement",
+    "provenance": "Full generation prompt embedded in PNG"
+  }],
+  "nativeCaptures": [
+    "review/phone-home.png", "review/phone-tools.png", "review/phone-superuser.png", "review/phone-policy.png",
+    "review/phone-home-dark-large.png", "review/phone-tools-dark-large.png", "review/phone-superuser-dark-large.png",
+    "review/tablet-home.png", "review/tablet-tools.png", "review/tablet-superuser.png"
+  ],
+  "emulator": "Android 14 Google APIs x86_64; phone and expanded wm configurations",
+  "physicalDeviceEvidence": false,
+  "legacyFinishAttempt": "build-phase finish --disposition ship refused because historical web hero/sections/motion/responsive remain open. Refusal preserved; no force or fabricated metrics. Native review and documentation complete at the stated scope, legacy web build remains unfinished/unsupported.",
+  "legacyWebGate": "Historical build/state.json is not the operative native record. Its legacy source traversal, web hero pixel metric and web responsive DOM gate are unsupported/skipped for Android, not passed. Historical hero failure and pending web phases remain unmodified for audit. No numeric measurement or historical seed output is fabricated. Current native artifact, phase evidence and valid comparison/review records are explicitly listed here.",
+  "releaseApproved": false
+}

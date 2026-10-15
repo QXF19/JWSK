@@ -7,13 +7,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.ui.text.font.FontFamily
@@ -30,11 +35,9 @@ import me.weishu.kernelsu.jwsk.ai.AiViewModel
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun JwskToolsScreen(bottomPadding: Dp) {
@@ -42,33 +45,54 @@ fun JwskToolsScreen(bottomPadding: Dp) {
     val model = viewModel<AiViewModel>()
     val config by model.settings.collectAsStateWithLifecycle()
     val colors = MiuixTheme.colorScheme
-    val pageColor = if (me.weishu.kernelsu.ui.theme.isInDarkTheme()) colors.background else Color(0xFFDFEFF8)
-    LazyColumn(modifier = Modifier.fillMaxSize().background(pageColor),
+    JwskArtworkPage(compact = true) { headerHeight, backdrop ->
+    LazyColumn(modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().align(Alignment.TopCenter),
         contentPadding = PaddingValues(bottom = bottomPadding + 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Box {
-                JwskHomeArtwork()
-                Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 14.dp, vertical = 8.dp)
-                    .background(colors.surface.copy(alpha = 0.90f), RoundedCornerShape(28.dp)).padding(horizontal = 14.dp),
+                Spacer(Modifier.fillMaxWidth().height(headerHeight))
+                JwskGlassPanel(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 14.dp, vertical = 8.dp), backdrop) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.jwsk_tools), fontSize = 22.sp)
                     Box(Modifier.size(48.dp).clickable { navigator.push(Route.Settings) }, contentAlignment = Alignment.Center) {
                         Icon(Icons.Default.Settings, stringResource(R.string.settings), modifier = Modifier.size(24.dp))
                     }
                 }
+                }
             }
         }
         item {
-            Card(Modifier.fillMaxWidth().padding(horizontal = 14.dp)) {
-                ArrowPreference(title = stringResource(R.string.jwsk_ai_assistant),
-                    summary = if (config.showUnconfiguredBadge) stringResource(R.string.jwsk_unconfigured) else null,
-                    onClick = { navigator.push(Route.AiChat) })
-                ArrowPreference(title = "Comput", summary = stringResource(R.string.jwsk_comput_description),
-                    onClick = { navigator.push(Route.Comput) })
-                ArrowPreference(title = stringResource(R.string.jwsk_logs), onClick = { navigator.push(Route.Sulog) })
+            JwskGlassPanel(Modifier.fillMaxWidth().padding(horizontal = 14.dp), backdrop) {
+                JwskToolRow(Icons.Default.ChatBubbleOutline, stringResource(R.string.jwsk_ai_assistant),
+                    stringResource(R.string.jwsk_ai_summary),
+                    if (config.showUnconfiguredBadge) stringResource(R.string.jwsk_unconfigured) else null) { navigator.push(Route.AiChat) }
+                JwskToolRow(Icons.Default.Terminal, stringResource(R.string.jwsk_comput_title),
+                    stringResource(R.string.jwsk_comput_manual_summary)) { navigator.push(Route.Comput) }
+                JwskToolRow(Icons.Default.Description, stringResource(R.string.jwsk_logs_title),
+                    stringResource(R.string.jwsk_logs_summary)) { navigator.push(Route.Sulog) }
             }
         }
+    }
+    }
+}
+
+@Composable
+private fun JwskToolRow(icon: ImageVector, title: String, summary: String, badge: String? = null, onClick: () -> Unit) {
+    val colors = MiuixTheme.colorScheme
+    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp).heightIn(min = 64.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(48.dp).background(colors.primary.copy(alpha = 0.12f), RoundedCornerShape(24.dp)), contentAlignment = Alignment.Center) {
+            Icon(icon, null, tint = colors.primary, modifier = Modifier.size(28.dp))
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(title, fontWeight = FontWeight.SemiBold, maxLines = 2)
+            Text(summary, maxLines = Int.MAX_VALUE, style = MiuixTheme.textStyles.body2, color = colors.onSurface)
+        }
+        if (badge != null) Text(badge, style = MiuixTheme.textStyles.footnote1, color = colors.onSurface,
+            modifier = Modifier.background(colors.primary.copy(alpha = 0.10f), RoundedCornerShape(12.dp)).padding(8.dp))
+        Icon(Icons.Default.ChevronRight, null, tint = colors.onSurface)
     }
 }
 
@@ -114,7 +138,7 @@ fun ComputScreen() {
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
             onClick = { confirm.showConfirm(title = "Comput", content = command) })
         LazyColumn(Modifier.weight(1f)) {
-            item { SelectionContainer { Text(output, fontFamily = FontFamily.Monospace) } }
+            item { SelectionContainer { Text(output, fontFamily = FontFamily.Monospace, maxLines = Int.MAX_VALUE) } }
         }
         TextButton(text = stringResource(R.string.jwsk_clear_output), enabled = !running, onClick = { output = "" })
     }

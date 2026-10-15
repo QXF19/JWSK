@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="jwsk_ai_summary">Chat, command recommendations and test suggestions</string>
+    <string name="jwsk_comput_title">Comput terminal</string>
+    <string name="jwsk_comput_manual_summary">Enter and run commands manually</string>
+    <string name="jwsk_logs_title">Log management</string>
+    <string name="jwsk_logs_summary">View, copy and export</string>
     <string name="jwsk_alpha_access_granted">Root access granted to %1$s</string>
     <string name="jwsk_alpha_access_denied">Root access denied to %1$s</string>
     <string name="jwsk_alpha_more">More options</string>

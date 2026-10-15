@@ -32,12 +32,12 @@ fun AlphaPatchScreen() {
             Text("Magisk Alpha", style = MiuixTheme.textStyles.title2, modifier = Modifier.padding(top = 10.dp))
         }
         LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            item { Text(stringResource(R.string.jwsk_alpha_patch_description)) }
+            item { Text(stringResource(R.string.jwsk_alpha_patch_description), maxLines = Int.MAX_VALUE) }
             item {
                 TextButton(text = stringResource(R.string.jwsk_alpha_select), enabled = !state.busy,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), onClick = { select.launch(arrayOf("*/*")) })
             }
-            state.name?.let { name -> item { SelectionContainer { Text(name) } } }
+            state.name?.let { name -> item { SelectionContainer { Text(name, maxLines = Int.MAX_VALUE) } } }
             item {
                 val enabled = !state.busy && !state.ready
                 Card {
@@ -65,10 +65,10 @@ fun AlphaPatchScreen() {
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), onClick = model::patch)
                 }
             }
-            if (state.error) item { Text(stringResource(R.string.jwsk_alpha_failed)) }
-            if (state.saved) item { Text(stringResource(R.string.jwsk_alpha_saved)) }
-            state.sha256?.let { sha -> item { SelectionContainer { Text("SHA-256\n$sha") } } }
-            if (state.log.isNotBlank()) item { SelectionContainer { Text(state.log) } }
+            if (state.error) item { Text(stringResource(R.string.jwsk_alpha_failed), maxLines = Int.MAX_VALUE) }
+            if (state.saved) item { Text(stringResource(R.string.jwsk_alpha_saved), maxLines = Int.MAX_VALUE) }
+            state.sha256?.let { sha -> item { SelectionContainer { Text("SHA-256\n$sha", maxLines = Int.MAX_VALUE) } } }
+            if (state.log.isNotBlank()) item { SelectionContainer { Text(state.log, maxLines = Int.MAX_VALUE) } }
         }
     }
 }

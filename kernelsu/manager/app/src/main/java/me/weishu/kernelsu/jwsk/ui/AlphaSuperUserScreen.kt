@@ -5,6 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -109,11 +116,19 @@ internal fun AlphaSuperUserScreen(bottomPadding: Dp) {
         }
         item { Text(stringResource(R.string.superuser), style = MiuixTheme.textStyles.title1,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) }
-        item { InputField(query = search, onQueryChange = { search = it.take(256) },
-            label = stringResource(R.string.jwsk_alpha_search), modifier = Modifier.fillMaxWidth(),
-            leadingIcon = { Icon(MiuixIcons.Basic.Search, null, modifier = Modifier.size(44.dp).padding(start = 16.dp, end = 8.dp),
-                tint = MiuixTheme.colorScheme.onSurfaceContainerHigh) },
-            onSearch = {}, expanded = false, onExpandedChange = {}) }
+        item { BasicTextField(value = search, onValueChange = { search = it.take(256) }, singleLine = true,
+            textStyle = TextStyle(fontSize = 17.sp, color = MiuixTheme.colorScheme.onSurface),
+            cursorBrush = SolidColor(MiuixTheme.colorScheme.primary),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .background(MiuixTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(28.dp)).padding(14.dp),
+            decorationBox = { field -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(MiuixIcons.Basic.Search, null, tint = MiuixTheme.colorScheme.onSurface, modifier = Modifier.size(24.dp))
+                Box(Modifier.weight(1f)) {
+                    if(search.isEmpty()) Text(stringResource(R.string.jwsk_alpha_search), color = MiuixTheme.colorScheme.onSurface, maxLines = 1)
+                    field()
+                }
+            } }) }
         if(state.loading) item { Text(stringResource(R.string.jwsk_loading), modifier = Modifier.padding(12.dp)) }
         if(state.failed) item { Text(stringResource(R.string.jwsk_alpha_manage_failed), modifier = Modifier.padding(12.dp)) }
         if(!state.loading && !state.available) item { Text(stringResource(R.string.jwsk_root_unavailable), modifier = Modifier.padding(12.dp)) }
