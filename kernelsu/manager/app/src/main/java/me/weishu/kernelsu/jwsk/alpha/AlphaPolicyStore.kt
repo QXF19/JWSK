@@ -2,6 +2,9 @@ package me.weishu.kernelsu.jwsk.alpha
 
 import android.content.Context
 import android.os.Process
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 internal data class AlphaPolicy(val uid: Int, val policy: Int, val until: Long,
     val logging: Boolean, val notification: Boolean) {
@@ -29,9 +32,15 @@ internal class AlphaPolicyStore(context: Context) {
         require(value.uid > 0 && value.uid / 100000 == Process.myUid() / 100000)
         require(value.policy in 0..3 && value.until >= 0)
         sql("REPLACE INTO policies(uid,policy,until,logging,notification) VALUES(${value.uid},${value.policy},${value.until},${if(value.logging) 1 else 0},${if(value.notification) 1 else 0})")
+        revision.update { it + 1 }
     }
     suspend fun remove(uid: Int) {
         require(uid > 0 && uid / 100000 == Process.myUid() / 100000)
         sql("DELETE FROM policies WHERE uid=$uid")
+        revision.update { it + 1 }
+    }
+    companion object {
+        private val revision = MutableStateFlow(0L)
+        val changes = revision.asStateFlow()
     }
 }

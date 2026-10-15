@@ -19,6 +19,13 @@ development checkpoint, not approval for a stable release.
 - Real PackageManager labels, packages, icon metadata and UID association
   passed. The new Alpha superuser list uses app identities, with UID confined
   to details. Expired policies do not count as active ROOT badges.
+- Native UI interactions verified the new per-app Allow control: the separate
+  test app returned `exit=0` and `0`; revoking returned `exit=13` and
+  `Permission denied`. After a synchronization fix, ROOT appeared immediately
+  on grant and disappeared immediately on revoke without manual refresh.
+- Phone light/dark/1.3 font-scale and portrait expanded-size captures now exist
+  in `.impeccable/review/`. These are valid emulator captures submitted for
+  independent UI review, not yet a finished review or hardware coverage.
 - Real independent test-app consent previously returned uid 0 on allow and
   Permission denied on deny. Ordinary apps were rejected by the root-only
   event provider. Authorization callbacks now emit native access toasts when

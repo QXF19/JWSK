@@ -32,10 +32,11 @@ internal class AlphaManagement(app: Application) : AndroidViewModel(app) {
     val state = mutable.asStateFlow()
     private var job: Job? = null
     private var current = AlphaSection.POLICIES
+    private var reloadPending = false
 
     fun load(section: AlphaSection = current) {
         current = section
-        if (job?.isActive == true) return
+        if (job?.isActive == true) { reloadPending = true; return }
         run { reload() }
     }
     private suspend fun reload() {
@@ -189,7 +190,11 @@ internal class AlphaManagement(app: Application) : AndroidViewModel(app) {
             catch (cancelled: CancellationException) { throw cancelled }
             catch (failure: Exception) { mutable.value = mutable.value.copy(failed = true,
                 text = (failure as? AlphaPatchFailure)?.diagnosticLog ?: mutable.value.text) }
-            finally { mutable.value = mutable.value.copy(loading = false) }
+            finally {
+                mutable.value = mutable.value.copy(loading = false)
+                job = null
+                if (reloadPending && currentCoroutineContext().isActive) { reloadPending = false; load(current) }
+            }
         }
     }
     companion object { val ID = Regex("[A-Za-z][A-Za-z0-9._-]{0,127}") }

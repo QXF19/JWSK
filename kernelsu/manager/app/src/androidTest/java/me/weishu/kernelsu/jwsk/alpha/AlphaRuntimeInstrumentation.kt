@@ -94,8 +94,10 @@ class AlphaRuntimeInstrumentation : Instrumentation() {
             val policies = AlphaPolicyStore(app)
             val testUid = app.packageManager.getApplicationInfo(context.packageName, 0).uid
             val previous = policies.policies().firstOrNull { it.uid == testUid }
+            val beforeRevision = AlphaPolicyStore.changes.value
             try {
                 policies.save(AlphaPolicy(testUid, 2, 0, true, true))
+                check(AlphaPolicyStore.changes.value > beforeRevision)
                 check(policies.policies().any { it.uid == testUid && it.policy == 2 })
                 policies.save(AlphaPolicy(testUid, 1, 0, false, false))
                 check(policies.policies().any { it.uid == testUid && it.policy == 1 && !it.logging })

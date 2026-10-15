@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.jwsk.alpha.*
@@ -44,7 +46,9 @@ internal fun AlphaSuperUserScreen(bottomPadding: Dp) {
     var showSystem by rememberSaveable { mutableStateOf(false) }
     var sortMenu by remember { mutableStateOf(false) }
     var moreMenu by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { model.load(AlphaSection.POLICIES) }
+    val policyRevision by AlphaPolicyStore.changes.collectAsStateWithLifecycle()
+    LaunchedEffect(policyRevision) { model.load(AlphaSection.POLICIES) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.load(AlphaSection.POLICIES) }
     val policies = remember(state.policies) { state.policies.associateBy { it.uid } }
     val filtered = remember(state.apps, policies, search, sortType, reversed, showSystem) {
         val collator = java.text.Collator.getInstance()
