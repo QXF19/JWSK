@@ -1,10 +1,8 @@
-name: Build Android APK
+name: Historical ADB manager (manual only)
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # Retained for historical-source recovery, never a native release candidate.
+  workflow_dispatch:
 
 jobs:
   build:

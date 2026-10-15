@@ -1,0 +1,63 @@
+diff --git a/native/src/core/lib.rs b/native/src/core/lib.rs
+--- a/native/src/core/lib.rs
++++ b/native/src/core/lib.rs
+@@ -76,6 +76,7 @@
+         POST_FS_DATA,
+         LATE_START,
+         BOOT_COMPLETE,
++        CHECK_JWSK_MANAGER,
+ 
+         END,
+     }
+diff --git a/native/src/core/daemon.rs b/native/src/core/daemon.rs
+--- a/native/src/core/daemon.rs
++++ b/native/src/core/daemon.rs
+@@ -247,6 +247,16 @@
+         if client.write_pod(&RespondCode::OK.repr).is_err() {
+             return;
+         }
+ 
++        if code == RequestCode::CHECK_JWSK_MANAGER {
++            ThreadPool::exec_task(move || {
++                let user = (cred.uid / 100000) as i32;
++                let manager_uid = self.get_manager_uid(user);
++                let trusted = i32::from(manager_uid >= 0 && manager_uid as u32 == cred.uid);
++                client.write_pod(&trusted).log_ok();
++            });
++            return;
++        }
++
+         if code.repr < RequestCode::_SYNC_BARRIER_.repr {
+             self.handle_request_sync(client, code)
+diff --git a/native/src/core/magisk.rs b/native/src/core/magisk.rs
+--- a/native/src/core/magisk.rs
++++ b/native/src/core/magisk.rs
+@@ -59,5 +59,6 @@
+     Version(Version),
+     VersionCode(VersionCode),
++    JwskManager(JwskManager),
+     List(ListApplets),
+     RemoveModules(RemoveModules),
+     InstallModule(InstallModule),
+@@ -92,6 +93,10 @@
+ #[argh(subcommand, name = "-V")]
+ struct VersionCode {}
+ 
++#[derive(FromArgs)]
++#[argh(subcommand, name = "--jwsk-manager")]
++struct JwskManager {}
++
+ #[derive(FromArgs)]
+ #[argh(subcommand, name = "--list")]
+ struct ListApplets {}
+@@ -200,5 +205,10 @@
+                 println!("{ver}");
+             }
++            JwskManager(_) => {
++                let mut fd = connect_daemon(RequestCode::CHECK_JWSK_MANAGER, false)?;
++                let trusted = i32::decode(&mut fd)?;
++                println!("{trusted}");
++            }
+             List(_) => {
+                 for name in APPLET_NAMES {
+                     println!("{name}");

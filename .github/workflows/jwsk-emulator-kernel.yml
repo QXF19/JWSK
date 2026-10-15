@@ -1,0 +1,56 @@
+name: JWSK isolated API34 kernel compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/ksu-native-manager]
+    paths:
+      - 'tools/emulator-kernel/**'
+      - '.github/workflows/jwsk-emulator-kernel.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jwsk-isolated-api34-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  exact-target-lkm:
+    # No release dependency: these artifacts are for a single dedicated AVD.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install ordinary kernel build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc bison flex libelf-dev libssl-dev dwarves libtinfo5 cpio rsync kmod zstd
+      - name: Test the bounded static compatibility gate
+        run: python3 -m unittest discover -s tools/emulator-kernel -p 'test_*.py' -v
+      - name: Restore only validated public prepared-kernel products
+        id: prepared-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/jwsk-api34-prepared-cache
+          key: api34-exact-7e35917775b8-eed2fff8b93c-ubuntu22-v2-${{ hashFiles('tools/emulator-kernel/emulator-api34.config') }}
+      - name: Build against the captured target without disabling kernel checks
+        id: kernel
+        shell: bash
+        run: bash tools/emulator-kernel/build.sh
+      - name: Save validated kernel products without signing keys
+        if: always() && steps.kernel.outputs.cache_ready == 'true' && steps.prepared-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/jwsk-api34-prepared-cache
+          key: ${{ steps.prepared-cache.outputs.cache-primary-key }}
+      - name: Upload diagnostic logs even on failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: JWSK-API34-exact-target-diagnostics
+          path: ${{ runner.temp }}/jwsk-api34-kernel/artifacts/
+          if-no-files-found: warn
+          retention-days: 7

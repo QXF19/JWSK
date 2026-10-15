@@ -11,7 +11,36 @@ if (ksFile.canRead()) {
     }
 } else {
     // Use the built-in configuration itself so AGP creates its debug keystore
-    // on a clean machine. Copying its values into "sign" skips that creation.
+    // on a clean machine. Release must never fall back to this identity.
     android.buildTypes.debug.signingConfig = android.signingConfigs.debug
-    android.buildTypes.release.signingConfig = android.signingConfigs.debug
+}
+
+def verifyJwskReleaseSigning = tasks.register('verifyJwskReleaseSigning') {
+    group = 'verification'
+    doLast {
+        def config = android.signingConfigs.sign
+        if (!ksFile.canRead() || config.storeFile == null || !config.storeFile.isFile() ||
+                !config.storePassword || !config.keyAlias || !config.keyPassword) {
+            throw new GradleException('JWSK release signing credentials are required; debug fallback is disabled.')
+        }
+        def certificate
+        try {
+            def store = java.security.KeyStore.getInstance(config.storeFile, config.storePassword.toCharArray())
+            if (!store.isKeyEntry(config.keyAlias)) throw new IllegalStateException()
+            certificate = store.getCertificate(config.keyAlias)
+            if (certificate == null) throw new IllegalStateException()
+        } catch (Exception ignored) {
+            throw new GradleException('Cannot read the JWSK release certificate. Check local signing credentials.')
+        }
+        def fingerprint = java.security.MessageDigest.getInstance('SHA-256')
+                .digest(certificate.encoded).encodeHex().toString()
+        if (fingerprint != '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f') {
+            throw new GradleException('Release certificate differs from published JWSK; refusing incompatible signing identity.')
+        }
+        logger.lifecycle('JWSK release certificate verified: SHA-256={}', fingerprint)
+    }
+}
+
+tasks.configureEach {
+    if (name == 'preReleaseBuild' || name == 'validateSigningRelease') dependsOn(verifyJwskReleaseSigning)
 }

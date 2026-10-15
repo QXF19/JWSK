@@ -1,0 +1,14 @@
+*.iml
+.gradle
+.idea
+.kotlin
+.DS_Store
+build
+captures
+.cxx
+local.properties
+key.jks
+/app/src/main/assets/jwsk_backend.properties
+/app/src/main/assets/alpha/
+# Local SDK test fixture, never included in a release or committed.
+app/src/androidTest/assets/avd-ramdisk.img

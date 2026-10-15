@@ -1,0 +1,9 @@
+diff --git a/scripts/env.py b/scripts/env.py
+--- a/scripts/env.py
++++ b/scripts/env.py
+@@ -174,4 +174,4 @@
+ if __name__ == "__main__":
+     ensure_cargo()
+     ensure_jdk()
+-    subprocess.run(sys.argv[1:])
++    raise SystemExit(subprocess.run(sys.argv[1:]).returncode)

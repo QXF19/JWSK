@@ -1,0 +1,105 @@
+name: JWSK Magisk Alpha backend validation
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches: [codex/ksu-native-manager]
+    paths:
+      - 'backends/magisk-alpha/**'
+      - '.github/workflows/jwsk-alpha.yml'
+
+concurrency:
+  group: jwsk-alpha-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  alpha-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: vvb2060/Magisk
+          ref: 96221b69fae9910b1c0c75c2f92a4ebb2c2dc698
+          submodules: recursive
+          path: alpha-build
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Configure the pinned upstream toolchain
+        working-directory: alpha-build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 96221b69fae9910b1c0c75c2f92a4ebb2c2dc698
+          cmp LICENSE ../backends/magisk-alpha/LICENSE
+          cp ../backends/magisk-alpha/config.prop config.prop
+          git apply --check ../backends/magisk-alpha/patches/0001-propagate-wrapper-exit-status.patch
+          git apply ../backends/magisk-alpha/patches/0001-propagate-wrapper-exit-status.patch
+          python3 build.py ndk
+          test "$(cat "$ANDROID_HOME/ndk/magisk/ONDK_VERSION")" = r30.1
+      - name: Generate native bindings before changing native source
+        working-directory: alpha-build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 build.py -r gen --abi arm64-v8a
+          cd native/src
+          python3 ../../scripts/env.py cargo check --locked --workspace --release --target aarch64-linux-android
+      - name: Bind the backend to the independent JWSK manager
+        working-directory: alpha-build
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check ../backends/magisk-alpha/patches/0002-jwsk-manager-package.patch
+          git apply ../backends/magisk-alpha/patches/0002-jwsk-manager-package.patch
+          git apply --check ../backends/magisk-alpha/patches/0003-readonly-manager-identity.patch
+          git apply ../backends/magisk-alpha/patches/0003-readonly-manager-identity.patch
+          grep -Fq 'default = ["check-signature", "check-client", "su-check-db"]' native/src/core/Cargo.toml
+          python3 build.py -r native
+      - name: Check and lint the modified Rust backend
+        working-directory: alpha-build/native/src
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in aarch64-linux-android x86_64-linux-android; do
+            python3 ../../scripts/env.py cargo check --locked --workspace --release --target "$target"
+            python3 ../../scripts/env.py cargo clippy --locked --workspace --no-deps --release --target "$target" -- -D warnings
+          done
+          # The pinned upstream/submodules have pre-existing workspace-format
+          # differences with ONDK's formatter. Check the native file we change,
+          # without recursively reformatting unrelated vendored dependencies.
+          python3 ../../scripts/env.py rustfmt --edition 2024 --config skip_children=true --check include/consts.rs core/lib.rs core/daemon.rs core/magisk.rs
+      - name: Collect runtime binaries and source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$GITHUB_WORKSPACE/alpha-out"
+          mkdir -p "$output/scripts" "$output/source"
+          for abi in armeabi-v7a x86 arm64-v8a x86_64; do
+            mkdir -p "$output/$abi"
+            for binary in magisk magiskinit magiskboot magiskpolicy libinit-ld.so; do
+              test -s "alpha-build/native/out/$abi/$binary"
+              cp "alpha-build/native/out/$abi/$binary" "$output/$abi/"
+            done
+            grep -aFq cn.jiangwang.jwsk "$output/$abi/magisk"
+          done
+          cp alpha-build/scripts/boot_patch.sh alpha-build/scripts/util_functions.sh "$output/scripts/"
+          cp backends/magisk-alpha/LICENSE backends/magisk-alpha/config.prop backends/magisk-alpha/README.md "$output/source/"
+          cp -R backends/magisk-alpha/patches "$output/source/"
+          git -C alpha-build rev-parse HEAD > "$output/source/upstream-commit.txt"
+          git -C alpha-build submodule status --recursive > "$output/source/submodules.txt"
+          git -C alpha-build diff -- scripts/env.py native/src/include/consts.rs native/src/core/lib.rs native/src/core/daemon.rs native/src/core/magisk.rs > "$output/source/applied.patch"
+          cd "$output"
+          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: JWSK-Alpha-native-development
+          path: alpha-out/
+          if-no-files-found: error

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:label="JWSK 授权测试">
+        <activity android:name="me.weishu.kernelsu.jwsk.alpha.AlphaRequestClientActivity"
+            android:exported="true" android:label="JWSK isolated Root test client" />
+    </application>
+</manifest>
