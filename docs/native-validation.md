@@ -1,5 +1,22 @@
 # Native manager validation checkpoint
 
+## 1.3.0 release candidate (latest record)
+
+The structured current record is `stable-validation.json`. Earlier sections are
+historical checkpoints, not the present release disposition. Native CI
+38704209990 succeeded at source 50b6e9883dcd6dfcffdfa5d1f70c3a7d4d73ce3f.
+The original-certificate non-debuggable APK was installed; Alpha home and
+confirmed manual Comput returned uid 0 in the magisk domain. KSU cold-boot
+instrumentation now passes identity/UAPI, actual uid 0, profile grant/revoke,
+inert module lifecycle, feature restoration and actual sulog file read/parse.
+Independent UID 10194 grant returned uid 0; revoke hid su with ENOENT.
+The same final non-debuggable APK then cold-booted with KSU, showed working state
+and returned uid 0 / ksu domain through confirmed manual Comput. Its final
+artifact SHA-256 is e01e669727b2bb1e28c6cccb5119540b60042b442497fbe0abb85b592f938a6d.
+Publication must consume that exact APK, never a replacement rebuild.
+The 2-GB emulator's recoverable System UI ANR and physical-device limits remain
+disclosed in the structured record and release notes.
+
 ## 2026-10-15: Final UI and exact-target KSU checkpoint
 
 This supersedes the older UI/signing status below. Still not a stable-release approval.
