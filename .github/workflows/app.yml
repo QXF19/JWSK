@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: jwsk-release-${{ inputs.release_tag || github.ref_name }}
@@ -24,13 +25,18 @@ concurrency:
 jobs:
   preflight:
     runs-on: ubuntu-latest
+    outputs:
+      artifact_run_id: ${{ steps.validate.outputs.artifact_run_id }}
+      artifact_sha256: ${{ steps.validate.outputs.artifact_sha256 }}
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.release_tag || github.ref }}
           fetch-depth: 0
       - name: Require the validated native manager version
+        id: validate
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
           SOURCE_COMMIT: ${{ github.sha }}
         run: |
@@ -39,7 +45,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
           test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
           python3 - <<'PY'
-          import json, os, pathlib, re
+          import json, os, pathlib, re, subprocess
           tag = os.environ['RELEASE_TAG']
           source = pathlib.Path('kernelsu/manager/build.gradle.kts').read_text()
           version = re.search(r'extra\["managerVersionName"\].*?\?: "([^"]+)"', source).group(1)
@@ -53,22 +59,41 @@ jobs:
           assert evidence['isolated_uid_grant_revoke'] == {'alpha': True, 'kernelsu': True}
           assert evidence['signing_sha256'] == '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f'
           assert pathlib.Path(f'docs/release-notes-{tag}.md').is_file()
+          # Promote the exact tested APK, not a second untested rebuild.
+          run_id = int(evidence['validated_artifact_run_id'])
+          run = json.loads(subprocess.check_output([
+              'gh', 'api', f'repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{run_id}'
+          ]))
+          assert run['status'] == 'completed' and run['conclusion'] == 'success'
+          assert run['head_repository']['full_name'] == os.environ['GITHUB_REPOSITORY']
+          assert run['path'] == '.github/workflows/jwsk-native.yml'
+          assert run['event'] in {'push', 'workflow_dispatch'}
+          assert run['head_sha'] == evidence['source_commit']
+          subprocess.run(['git', 'merge-base', '--is-ancestor', run['head_sha'], 'HEAD'], check=True)
+          changed = subprocess.check_output(['git', 'diff', '--name-only', run['head_sha'], 'HEAD'], text=True).splitlines()
+          allowed = {'README.md', 'DESIGN.md', '.github/workflows/app.yml'}
+          assert all(p in allowed or p.startswith(('docs/', '.impeccable/')) for p in changed), changed
+          digest = evidence['artifact_sha256']
+          assert re.fullmatch('[0-9a-f]{64}', digest)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'artifact_run_id={run_id}\nartifact_sha256={digest}\n')
           PY
-  native:
-    needs: preflight
-    uses: ./.github/workflows/jwsk-native.yml
-    secrets: inherit
   publish:
-    needs: native
+    needs: preflight
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/download-artifact@v8
         with:
           name: JWSK-native-signed-development
           path: signed-manager
+          run-id: ${{ needs.preflight.outputs.artifact_run_id }}
+          github-token: ${{ github.token }}
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -78,12 +103,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
           PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+          EXPECTED_SHA256: ${{ needs.preflight.outputs.artifact_sha256 }}
         run: |
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           (cd signed-manager && sha256sum -c SHA256SUMS)
           mapfile -t apks < <(find signed-manager -maxdepth 1 -name '*.apk')
           test "${#apks[@]}" = 1
+          test "$(sha256sum "${apks[0]}" | cut -d ' ' -f 1)" = "$EXPECTED_SHA256"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 'build-tools;37.0.0'
           signer="$ANDROID_HOME/build-tools/37.0.0/apksigner"
           apk_version=$("$ANDROID_HOME/build-tools/37.0.0/aapt2" dump badging "${apks[0]}" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
