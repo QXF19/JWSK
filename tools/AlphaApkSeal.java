@@ -112,12 +112,13 @@ public final class AlphaApkSeal {
                 || !"0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d".equals(ksu.getProperty("KSU_SOURCE_COMMIT"))
                 || !"96221b69fae9910b1c0c75c2f92a4ebb2c2dc698".equals(alpha.getProperty("ALPHA_SOURCE_COMMIT"))
                 || !"31000".equals(alpha.getProperty("ALPHA_VERSION_CODE"))
-                || !"1".equals(alpha.getProperty("ALPHA_MANAGER_PROTOCOL"))) {
+                || !"1".equals(alpha.getProperty("ALPHA_MANAGER_PROTOCOL"))
+                || !"0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d".equals(alpha.getProperty("ALPHA_BUSYBOX_SOURCE"))) {
                 throw new SecurityException("Unexpected backend identity receipt");
             }
             for (String abi : List.of("arm64-v8a", "x86_64")) {
                 checkDigest(zip, "lib/" + abi + "/libksud.so", ksu.getProperty("KSUD_SHA256_" + abi), 32 * 1024 * 1024);
-                for (String binary : List.of("magisk", "magiskinit", "magiskboot", "magiskpolicy", "init_ld")) {
+                for (String binary : List.of("magisk", "magiskinit", "magiskboot", "magiskpolicy", "init_ld", "busybox")) {
                     checkDigest(zip, "lib/" + abi + "/libalpha_" + binary + ".so",
                         alpha.getProperty("ALPHA_SHA256_" + abi + "_" + binary), 32 * 1024 * 1024);
                 }

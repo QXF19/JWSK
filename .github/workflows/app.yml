@@ -1,104 +1,96 @@
-name: App
+name: JWSK signed release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing stable version tag
+        type: string
+        required: true
+      publish:
+        description: Publish after all release checks pass
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: jwsk-release-${{ inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  build:
+  preflight:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
-          submodules: 'recursive'
+          ref: ${{ inputs.release_tag || github.ref }}
           fetch-depth: 0
-      - name: Grant execute permission for Gradle wrapper
-        run: chmod +x gradlew
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-      - name: Write key
-        if: github.event_name != 'pull_request'
+      - name: Require the validated native manager version
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-          KEYSTORE_ALIAS_PASSWORD: ${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEYSTORE_ALIAS" ] || [ -z "$KEYSTORE_ALIAS_PASSWORD" ]; then
-            echo "Release signing secrets are required. Debug-signed release artifacts are not allowed."
-            exit 1
-          fi
-          {
-            printf 'KEYSTORE_PASSWORD=%s\n' "$KEYSTORE_PASSWORD"
-            printf 'KEYSTORE_ALIAS=%s\n' "$KEYSTORE_ALIAS"
-            printf 'KEYSTORE_ALIAS_PASSWORD=%s\n' "$KEYSTORE_ALIAS_PASSWORD"
-            printf 'KEYSTORE_FILE=../key.jks\n'
-          } > signing.properties
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > key.jks
-      - name: Setup Android SDK
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --channel=3 --licenses > /dev/null || true
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          dependency-graph: generate-and-submit
-          build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-use-agree: "yes"
-      - name: Build and test Rust JNI core
-        run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager 'ndk;29.0.14206865'
-          rustup toolchain install stable --profile minimal --component rustfmt
-          rustup default stable
-          bash scripts/build-rust-android.sh
-      - name: Build with Gradle
-        id: buildWithGradle
-        run: |
-          echo 'android.sdk.channel=3' >> gradle.properties
-          echo 'android.native.buildOutput=verbose' >> gradle.properties
-          echo 'org.gradle.caching=true' >> gradle.properties
-          echo 'org.gradle.parallel=true' >> gradle.properties
-          ./gradlew :manager:testDebugUnitTest :manager:assembleRelease
-          release_path=$(find out/apk -maxdepth 1 -name 'JWSK-v*-release.apk' -print -quit)
-          test -n "$release_path"
-          release_name=$(basename "$release_path" .apk)
-          echo "releaseName=$release_name" >> "$GITHUB_OUTPUT"
-      - name: Verify release APK signing identity
-        shell: bash
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+          SOURCE_COMMIT: ${{ github.sha }}
         run: |
           set -euo pipefail
-          release_path=$(find out/apk -maxdepth 1 -name 'JWSK-v*-release.apk' -print -quit)
-          test -n "$release_path"
-          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$release_path" | tee "$RUNNER_TEMP/jwsk-signature.txt"
-          grep -Fq 'certificate SHA-256 digest: 1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' "$RUNNER_TEMP/jwsk-signature.txt"
-          # Force a separate v2 check for KernelSU's APK identity reader.
-          # This verifier range does not change the application's minSdk.
-          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --min-sdk-version 24 --max-sdk-version 27 --verbose "$release_path" | tee "$RUNNER_TEMP/jwsk-signature-v2.txt"
-          grep -Fq 'Verified using v2 scheme (APK Signature Scheme v2): true' "$RUNNER_TEMP/jwsk-signature-v2.txt"
-      - name: Upload release
-        if: success()
-        uses: actions/upload-artifact@v6
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          tag = os.environ['RELEASE_TAG']
+          source = pathlib.Path('kernelsu/manager/build.gradle.kts').read_text()
+          version = re.search(r'extra\["managerVersionName"\].*?\?: "([^"]+)"', source).group(1)
+          assert version == tag[1:] and '-dev' not in version
+          evidence = json.loads(pathlib.Path('docs/stable-validation.json').read_text())
+          assert evidence['version'] == version and evidence['status'] == 'passed'
+          assert set(evidence['root_backends']) == {'alpha', 'kernelsu'}
+          assert evidence['alpha_cold_boot'] is True
+          assert evidence['signing_sha256'] == '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f'
+          assert pathlib.Path(f'docs/release-notes-{tag}.md').is_file()
+          PY
+  native:
+    needs: preflight
+    uses: ./.github/workflows/jwsk-native.yml
+    secrets: inherit
+  publish:
+    needs: native
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
         with:
-          name: ${{ steps.buildWithGradle.outputs.releaseName }}
-          path: "out"
-          compression-level: 9
-
-      - name: GitHub Release
-        uses: softprops/action-gh-release@v3
-        if: startsWith(github.ref, 'refs/tags/')
+          name: JWSK-native-signed-development
+          path: signed-manager
+      - uses: actions/setup-java@v5
         with:
-          files: out/apk/*.apk
-          fail_on_unmatched_files: true
-          body_path: docs/release-notes-${{ github.ref_name }}.md
-          generate_release_notes: true
+          distribution: temurin
+          java-version: '21'
+      - name: Verify and publish signed native release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+          PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          (cd signed-manager && sha256sum -c SHA256SUMS)
+          mapfile -t apks < <(find signed-manager -maxdepth 1 -name '*.apk')
+          test "${#apks[@]}" = 1
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --channel=3 'build-tools;37.0.0'
+          signer="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          apk_version=$("$ANDROID_HOME/build-tools/37.0.0/aapt2" dump badging "${apks[0]}" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+          test "$apk_version" = "${RELEASE_TAG#v}"
+          "$signer" verify --verbose --print-certs "${apks[0]}" > signed-manager/certificate.txt
+          grep -Fq '1f934155f4ffc1aeefb44faa15bdbef277ca4472435ed45e09fa583b9d67a76f' signed-manager/certificate.txt
+          "$signer" verify --min-sdk-version 24 --max-sdk-version 27 --verbose "${apks[0]}" | grep -F 'Verified using v2 scheme (APK Signature Scheme v2): true'
+          mkdir -p release
+          cp "${apks[0]}" "release/JWSK-$RELEASE_TAG.apk"
+          cp docs/stable-validation.json signed-manager/certificate.txt release/
+          (cd release && sha256sum ./*.apk > SHA256SUMS)
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "JWSK $RELEASE_TAG" --notes-file "docs/release-notes-$RELEASE_TAG.md" release/*
+          if [ "$PUBLISH" = true ]; then gh release edit "$RELEASE_TAG" --draft=false --latest; fi

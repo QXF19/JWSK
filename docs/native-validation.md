@@ -1,5 +1,35 @@
 # Native manager validation checkpoint
 
+## 2026-10-15: Cold-boot Alpha and application identities
+
+The following supersedes the older Alpha limitations below. This remains a
+development checkpoint, not approval for a stable release.
+
+- The dedicated Android 14 x86_64 AVD cold-booted using the app-patched private
+  ramdisk, without live injection. SELinux remained Enforcing; ADB remained
+  the ordinary shell user. No SDK image or physical partition was modified.
+- The latest original-certificate debug build passed 117 unit tests, with
+  zero failures/errors. The APK seal utility passed 13 artifact/protocol tests.
+- Application-UID instrumentation on that cold-booted backend verified six
+  executable receipts, scripts/bootstrap, manager identity and actual uid 0.
+- Persistent grant/revoke/restore, inert module ZIP installation/listing/
+  disable/enable, settings persistence, and the test application's DenyList
+  target passed through the actual manager repositories. Original settings
+  were restored and test module directories removed.
+- Real PackageManager labels, packages, icon metadata and UID association
+  passed. The new Alpha superuser list uses app identities, with UID confined
+  to details. Expired policies do not count as active ROOT badges.
+- Real independent test-app consent previously returned uid 0 on allow and
+  Permission denied on deny. Ordinary apps were rejected by the root-only
+  event provider. Authorization callbacks now emit native access toasts when
+  notifications are enabled.
+- Actual v4 init_boot patching again passed, preserving the source hash and
+  cleaning the app-private workspace. Pending boot runtime files and private
+  access databases are excluded from backup/transfer.
+- KSU target-specific emulator loading, complete device-class UI review and
+  the final signed release workflow remain pending. No physical test phone
+  is available. No cross-OEM or whole-device stability claim is made.
+
 Date: 2026-10-14. This is a development checkpoint, not a release approval.
 
 ## Verified

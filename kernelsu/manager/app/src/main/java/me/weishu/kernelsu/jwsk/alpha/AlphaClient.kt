@@ -10,6 +10,7 @@ internal data class AlphaStatus(val available: Boolean = false, val trustedManag
 
 /** Uses the running daemon's own inode and its read-only, certificate-backed identity query. */
 internal class AlphaClient(context: Context) {
+    private val app = context.applicationContext
     private val assets = AlphaAssets(context)
     private val runner = BoundedProcessRunner()
 
@@ -37,8 +38,34 @@ internal class AlphaClient(context: Context) {
         val identity = runInterruptible { runner.run(listOf(active.path, "--jwsk-manager"), null, emptyMap(), 5000) }
         check(identity.exitCode() == 0 && identity.output().trim() == "1") { "JWSK is not the verified Alpha manager" }
         val seconds = ((timeoutMillis + 999) / 1000).coerceIn(1, 120)
-        val bounded = "exec /system/bin/toybox timeout -s KILL $seconds /system/bin/sh -c ${quote(command)}"
+        val binPath = checkNotNull(active.parentFile).path + ":/system/bin:/system/xbin"
+        val bounded = "export PATH=${quote(binPath)}; exec /system/bin/toybox timeout -s KILL $seconds /system/bin/sh -c ${quote(command)}"
         runInterruptible { runner.run(listOf(active.path, "su", "-c", bounded), null, emptyMap(), timeoutMillis.coerceIn(1, 120000)) }
+    }
+
+    /** Called only by explicit module installation; deploys this APK's verified support files. */
+    suspend fun prepareRuntime() = withContext(Dispatchers.IO) {
+        val payload = assets.load()
+        val work = java.nio.file.Files.createTempDirectory(app.cacheDir.toPath(), "jwsk-alpha-runtime-").toFile()
+        try {
+            val util = File(work, "util_functions.sh")
+            util.writeText(payload.scripts.getValue("util_functions.sh").toString(Charsets.UTF_8)
+                .replace("#MAGISK_VERSION_STUB", "MAGISK_VER='96221b69-alpha-jwsk'\nMAGISK_VER_CODE=31000"))
+            val operations = mutableListOf("[ ! -L /data/adb/magisk ]", "mkdir -p /data/adb/magisk", "chmod 700 /data/adb/magisk")
+            for (name in listOf("magisk", "magiskinit", "magiskboot", "magiskpolicy", "busybox")) {
+                operations += "cp ${quote(payload.binaries.getValue(name).path)} /data/adb/magisk/$name"
+                operations += "chmod 755 /data/adb/magisk/$name"
+                operations += "chown 0:0 /data/adb/magisk/$name"
+            }
+            operations += "cp ${quote(util.path)} /data/adb/magisk/util_functions.sh"
+            operations += "chmod 644 /data/adb/magisk/util_functions.sh"
+            operations += "chown 0:0 /data/adb/magisk/util_functions.sh"
+            val result = root(operations.joinToString(" && "), 15000)
+            check(result.exitCode() == 0) { "Cannot prepare Alpha runtime files" }
+        } finally {
+            File(work, "util_functions.sh").delete()
+            work.delete()
+        }
     }
 
     private suspend fun findActive(payload: AlphaPayload): File? = runInterruptible {

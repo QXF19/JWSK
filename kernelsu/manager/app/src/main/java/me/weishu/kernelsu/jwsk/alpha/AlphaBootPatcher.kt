@@ -86,6 +86,7 @@ internal class AlphaBootPatcher(context: Context) {
             check(image.parentFile == work.canonicalFile && image.isFile)
             val inspection = runInterruptible { KernelArtifactInspector.inspectBootImage(image) }
             check(runInterruptible { AlphaAssets.sha256(input.inputStream()) } == original.sha256())
+            AlphaBootFiles.prepare(app, payload)
             accepted = true
             AlphaPatchOutput(image, inspection, original.sha256(), result.output())
         } finally {
@@ -122,7 +123,7 @@ internal class AlphaBootPatcher(context: Context) {
 
     companion object {
         // Source the unchanged upstream patcher, overriding only recovery/device-side helpers.
-        // BOOTMODE=false prevents the patcher from querying a live Root daemon for preinit.
+        // The preinit-device CLI reads mount metadata locally; it does not start a daemon.
         private val WRAPPER = """
             #!/system/bin/sh
             printf '%s\n' "${'$'}${'$'}" > process.pid
@@ -135,7 +136,9 @@ internal class AlphaBootPatcher(context: Context) {
             export TMPDIR="${'$'}PWD/tmp"
             export SOURCEDMODE=true
             export BOOTMODE=false
-            unset MODPATH PREINITDEVICE BOOTNAND
+            unset MODPATH BOOTNAND
+            PREINITDEVICE=${'$'}(./magisk --preinit-device 2>/dev/null || true)
+            case "${'$'}PREINITDEVICE" in ''|*[!A-Za-z0-9._-]*) unset PREINITDEVICE;; esac
             ulimit -f 1048576 || exit 1
             . ./boot_patch.sh ./input.img
             [ -s new-boot.img ] || exit 1

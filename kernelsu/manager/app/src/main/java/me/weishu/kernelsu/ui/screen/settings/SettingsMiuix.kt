@@ -111,6 +111,8 @@ fun SettingPagerMiuix(
                     Card(modifier = Modifier.padding(top = 12.dp).fillMaxWidth()) {
                         ArrowPreference(title = stringResource(R.string.jwsk_api_settings),
                             onClick = { jwskNavigator.push(me.weishu.kernelsu.ui.navigation3.Route.AiSettings) })
+                        ArrowPreference(title = stringResource(R.string.jwsk_alpha_settings),
+                            onClick = { jwskNavigator.push(me.weishu.kernelsu.ui.navigation3.Route.AlphaSettings) })
                     }
                     Card(
                         modifier = Modifier

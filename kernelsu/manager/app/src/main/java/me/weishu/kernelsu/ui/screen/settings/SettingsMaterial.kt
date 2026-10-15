@@ -105,6 +105,12 @@ fun SettingPagerMaterial(
                         headlineContent = { Text(stringResource(R.string.jwsk_api_settings)) },
                         trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
                     )
+                }, {
+                    SegmentedListItem(
+                        onClick = { navigator.push(Route.AlphaSettings) },
+                        headlineContent = { Text(stringResource(R.string.jwsk_alpha_settings)) },
+                        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                    )
                 }),
             )
             KsuIsValid {

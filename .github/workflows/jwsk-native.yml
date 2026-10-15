@@ -1,6 +1,7 @@
 name: JWSK native backend validation
 
 on:
+  workflow_call:
   workflow_dispatch:
   push:
     branches: [codex/ksu-native-manager]
@@ -13,7 +14,7 @@ on:
       - '.github/workflows/jwsk-alpha.yml'
 
 concurrency:
-  group: jwsk-native-${{ github.ref }}
+  group: jwsk-native-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -212,6 +213,9 @@ jobs:
               cp "alpha-backend/$abi/$binary" "$libs/libalpha_$binary.so"
             done
             cp "alpha-backend/$abi/libinit-ld.so" "$libs/libalpha_init_ld.so"
+            source_arch=aarch64
+            if [ "$abi" = x86_64 ]; then source_arch=x86_64; fi
+            cp "kernelsu/userspace/ksud/bin/$source_arch/busybox" "$libs/libalpha_busybox.so"
           done
           classes="$RUNNER_TEMP/alpha-seal-classes"
           apksig="$ANDROID_HOME/build-tools/37.0.0/lib/apksigner.jar"
@@ -221,9 +225,9 @@ jobs:
           test "$("$ANDROID_HOME/build-tools/37.0.0/aapt2" dump packagename "$RUNNER_TEMP/jwsk-bootstrap-unsigned.apk")" = cn.jiangwang.jwsk
           java -cp "$classes:$apksig" AlphaApkSeal --bootstrap "$RUNNER_TEMP/jwsk-bootstrap-unsigned.apk" "$assets/stub.apk"
           {
-            printf 'ALPHA_SOURCE_COMMIT=96221b69fae9910b1c0c75c2f92a4ebb2c2dc698\nALPHA_VERSION_CODE=31000\nALPHA_MANAGER_PROTOCOL=1\n'
+            printf 'ALPHA_SOURCE_COMMIT=96221b69fae9910b1c0c75c2f92a4ebb2c2dc698\nALPHA_VERSION_CODE=31000\nALPHA_MANAGER_PROTOCOL=1\nALPHA_BUSYBOX_SOURCE=0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d\n'
             for abi in arm64-v8a x86_64; do
-              for binary in magisk magiskinit magiskboot magiskpolicy init_ld; do
+              for binary in magisk magiskinit magiskboot magiskpolicy init_ld busybox; do
                 digest=$(sha256sum "kernelsu/manager/app/src/main/jniLibs/$abi/libalpha_$binary.so" | cut -d ' ' -f 1)
                 printf 'ALPHA_SHA256_%s_%s=%s\n' "$abi" "$binary" "$digest"
               done
@@ -271,7 +275,8 @@ jobs:
           mkdir -p "$classes" ../../native-manager
           javac -encoding UTF-8 -cp "$apksig" -d "$classes" ../../tools/AlphaApkSeal.java ../../tools/AlphaApkSealTest.java
           java -cp "$classes:$apksig" AlphaApkSealTest
-          java -cp "$classes:$apksig" AlphaApkSeal "$apk" ../../native-manager/JWSK_1.3.0-dev_5-development.apk
+          sealed="../../native-manager/$(basename "$apk" -release.apk)-signed.apk"
+          java -cp "$classes:$apksig" AlphaApkSeal "$apk" "$sealed"
           cp release-certificate.txt ../../native-manager/
           cd ../../native-manager
           sha256sum ./*.apk > SHA256SUMS

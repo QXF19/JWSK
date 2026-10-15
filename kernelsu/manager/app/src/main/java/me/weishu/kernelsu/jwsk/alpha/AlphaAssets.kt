@@ -28,10 +28,11 @@ internal class AlphaAssets(context: Context) {
         check(receipt.getProperty("ALPHA_SOURCE_COMMIT") == SOURCE)
         check(receipt.getProperty("ALPHA_VERSION_CODE") == "31000")
         check(receipt.getProperty("ALPHA_MANAGER_PROTOCOL") == "1")
+        check(receipt.getProperty("ALPHA_BUSYBOX_SOURCE") == "0c0fdb960178fa12d80d6cbcfdcb6ad8be6a865d")
         val abi = Build.SUPPORTED_ABIS.firstOrNull { receipt.containsKey("ALPHA_SHA256_${it}_magisk") }
             ?: error("Unsupported Alpha architecture")
         val nativeDirectory = File(app.applicationInfo.nativeLibraryDir).canonicalFile
-        val binaries = listOf("magisk", "magiskinit", "magiskboot", "magiskpolicy", "init_ld").associateWith { name ->
+        val binaries = listOf("magisk", "magiskinit", "magiskboot", "magiskpolicy", "init_ld", "busybox").associateWith { name ->
             val file = File(nativeDirectory, "libalpha_$name.so").canonicalFile
             check(file.parentFile == nativeDirectory && file.isFile)
             check(file.length() in 1..(32L * 1024 * 1024))

@@ -213,7 +213,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.About>(swipeDismiss = swipeDismiss) { AboutScreen() }
                             entry<Route.Sulog>(swipeDismiss = swipeDismiss) {
                                 if (Natives.isFullFeatured()) SulogScreen()
-                                else me.weishu.kernelsu.jwsk.ui.RootUnavailableScreen(stringResource(me.weishu.kernelsu.R.string.jwsk_logs))
+                                else me.weishu.kernelsu.jwsk.ui.AlphaManagementScreen(me.weishu.kernelsu.jwsk.alpha.AlphaSection.LOGS, showBack = true)
                             }
                             entry<Route.ColorPalette>(swipeDismiss = swipeDismiss) { ColorPaletteScreen() }
                             entry<Route.AppProfileTemplate>(swipeDismiss = swipeDismiss) { AppProfileTemplateScreen() }
@@ -224,6 +224,8 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Install>(swipeDismiss = swipeDismiss) { me.weishu.kernelsu.jwsk.ui.InstallHubScreen() }
                             entry<Route.KernelSuInstall>(swipeDismiss = swipeDismiss) { InstallScreen() }
                             entry<Route.AlphaPatch>(swipeDismiss = swipeDismiss) { me.weishu.kernelsu.jwsk.ui.AlphaPatchScreen() }
+                            entry<Route.AlphaSettings>(swipeDismiss = swipeDismiss) { me.weishu.kernelsu.jwsk.ui.AlphaManagementScreen(me.weishu.kernelsu.jwsk.alpha.AlphaSection.SETTINGS, showBack = true) }
+                            entry<Route.AlphaPolicy>(swipeDismiss = swipeDismiss) { key -> me.weishu.kernelsu.jwsk.ui.AlphaPolicyScreen(key.uid) }
                             entry<Route.Flash>(swipeDismiss = if (flashBackEnabled) swipeDismiss else NavSwipeDirection.None) { key ->
                                 FlashScreen(
                                     key.flashIt,
@@ -410,11 +412,11 @@ fun MainScreen(
                         0 -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage)
                         1 -> if (contentReady || isCurrentPage) {
                             if (isFullFeatured) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
-                            else me.weishu.kernelsu.jwsk.ui.RootUnavailableScreen(stringResource(me.weishu.kernelsu.R.string.superuser))
+                            else me.weishu.kernelsu.jwsk.ui.AlphaSuperUserScreen(bottomInnerPadding)
                         }
                         2 -> if (contentReady || isCurrentPage) {
                             if (isFullFeatured) ModulePager(bottomInnerPadding, isCurrentPage)
-                            else me.weishu.kernelsu.jwsk.ui.RootUnavailableScreen(stringResource(me.weishu.kernelsu.R.string.module))
+                            else me.weishu.kernelsu.jwsk.ui.AlphaManagementScreen(me.weishu.kernelsu.jwsk.alpha.AlphaSection.MODULES, bottomInnerPadding)
                         }
                         3 -> if (contentReady || isCurrentPage) me.weishu.kernelsu.jwsk.ui.JwskToolsScreen(bottomInnerPadding)
                     }
