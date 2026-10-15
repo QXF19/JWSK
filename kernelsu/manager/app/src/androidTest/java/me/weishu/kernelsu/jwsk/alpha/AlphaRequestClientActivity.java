@@ -24,7 +24,7 @@ public final class AlphaRequestClientActivity extends Activity {
                 process = request.redirectErrorStream(true).start();
                 if (!process.waitFor(75000, TimeUnit.MILLISECONDS)) throw new IllegalStateException("Root request timed out");
                 result = "exit=" + process.exitValue() + "\n" + new String(process.getInputStream().readNBytes(4096), StandardCharsets.UTF_8);
-            } catch (Exception failure) { result = failure.getClass().getSimpleName(); }
+            } catch (Exception failure) { result = failure.getClass().getSimpleName() + ": " + failure.getMessage(); }
             finally { if (process != null && process.isAlive()) process.destroyForcibly(); }
             String text = result;
             runOnUiThread(() -> output.setText(text));

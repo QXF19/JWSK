@@ -8,6 +8,9 @@ import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.ui.util.getRootShell
 import me.weishu.kernelsu.ui.util.listModules
 import me.weishu.kernelsu.ui.util.toggleModule
+import me.weishu.kernelsu.ui.util.listSulogFiles
+import me.weishu.kernelsu.ui.util.readSulogFile
+import me.weishu.kernelsu.ui.util.parseSulogLines
 import org.json.JSONArray
 import java.io.File
 import java.util.zip.ZipEntry
@@ -32,9 +35,11 @@ class KsuRuntimeInstrumentation : Instrumentation() {
                 check(Natives.isManager) { "Original signing identity not recognized by the kernel" }
                 check(Natives.version == 32680 && Natives.kernelUAPIVersion == Natives.managerUAPIVersion)
                 check(Natives.isLkmMode && Natives.isFullFeatured())
+                result.putString("boot_mode", if (Natives.isLateLoadMode) "late-load" else "cold-boot")
                 val shell = getRootShell()
-                val root = shell.newJob().add("id -u; id -Z; getenforce").exec()
-                check(root.isSuccess && root.out.firstOrNull() == "0")
+                val root = shell.newJob().add("id -u; id -Z; getenforce")
+                    .to(ArrayList<String>(), ArrayList<String>()).exec()
+                check(root.isSuccess && root.out.firstOrNull() == "0") { "Root check: ${root.code} ${root.out} ${root.err}" }
                 check(root.out.any { it == "Enforcing" })
                 result.putString("identity", "passed: kernel certificate-backed manager, uid 0, matching UAPI, SELinux Enforcing")
                 val uid = app.packageManager.getApplicationInfo(context.packageName, 0).uid
@@ -62,7 +67,9 @@ class KsuRuntimeInstrumentation : Instrumentation() {
                     result.putString("settings", "passed: native su/umount feature roundtrip, originals restored")
                     val id = "jwsk_validation_inert"
                     val fixture = File.createTempFile("jwsk-ksu-inert-", ".zip", app.cacheDir)
-                    fun command(value: String) = shell.newJob().add(value).exec().also { check(it.isSuccess) { it.err.joinToString("\n") } }
+                    fun command(value: String) = shell.newJob().add(value)
+                        .to(ArrayList<String>(), ArrayList<String>()).exec()
+                        .also { check(it.isSuccess) { it.err.joinToString("\n") } }
                     check(shell.newJob().add("test ! -e /data/adb/modules/$id && test ! -e /data/adb/modules_update/$id").exec().isSuccess)
                     try {
                         ZipOutputStream(fixture.outputStream()).use { zip ->
@@ -80,6 +87,23 @@ class KsuRuntimeInstrumentation : Instrumentation() {
                         fixture.delete()
                         command("rm -rf /data/adb/modules/jwsk_validation_inert /data/adb/modules_update/jwsk_validation_inert")
                     }
+                    val ksud = app.applicationInfo.nativeLibraryDir + "/libksud.so"
+                    val logState = command("$ksud feature get sulog").out
+                        .first { it.startsWith("Value: ") }.substringAfter("Value: ").trim().toLong()
+                    try {
+                        command("$ksud feature set sulog 1")
+                        command("$ksud debug sulogd")
+                        command("/system/bin/id -u")
+                        var hasEvents = false
+                        repeat(10) {
+                            if (!hasEvents) {
+                                Thread.sleep(500)
+                                hasEvents = listSulogFiles().any { parseSulogLines(readSulogFile(it.path)).isNotEmpty() }
+                            }
+                        }
+                        check(hasEvents) { "No real kernel log events available through manager helpers" }
+                        result.putString("logs", "passed: kernel sulog daemon, file listing/read/parse; original feature restored")
+                    } finally { command("$ksud feature set sulog $logState") }
                 }
                 finish(Activity.RESULT_OK, result)
             } catch (failure: Throwable) {
